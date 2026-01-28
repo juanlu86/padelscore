@@ -1,4 +1,5 @@
 import SwiftUI
+import PadelCore
 
 struct iPhoneMatchView: View {
     @State var viewModel = MatchViewModel()
@@ -14,7 +15,7 @@ struct iPhoneMatchView: View {
                             
                             VStack {
                                 Text("VS")
-                                    .font(.system(.headline, weight: .black))
+                                    .font(.system(.headline, design: .default, weight: .black))
                                     .foregroundColor(.secondary.opacity(0.5))
                             }
                             
@@ -23,7 +24,7 @@ struct iPhoneMatchView: View {
                     }
                     .padding()
                     .background(Color(.secondarySystemBackground))
-                    .cornerRadius(24)
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
                     
                     // Quick Controls
                     VStack(alignment: .leading, spacing: 12) {
@@ -61,10 +62,10 @@ struct TeamScoreCard: View {
         VStack(spacing: 12) {
             Circle()
                 .fill(color.gradient)
-                .frame(width: 60, height: 60)
+                .frame(width: 60.0, height: 60.0)
                 .overlay {
                     Text(score)
-                        .font(.system(.title2, weight: .bold, design: .rounded))
+                        .font(.system(.title2, design: .rounded, weight: .bold))
                         .foregroundColor(.white)
                 }
             
@@ -103,7 +104,7 @@ struct ActionButton: View {
             .padding(.vertical, 16)
             .background(color.opacity(0.1))
             .foregroundColor(color)
-            .cornerRadius(16)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
         }
     }
 }

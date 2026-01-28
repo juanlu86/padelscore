@@ -11,7 +11,7 @@ import SwiftUI
 struct PadeliOSApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            iPhoneMatchView()
         }
     }
 }

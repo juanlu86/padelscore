@@ -8,6 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		95FB7B8F2F2A5A4C00B7DC55 /* PadeliOS Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 95FB7B8E2F2A5A4C00B7DC55 /* PadeliOS Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		95FB7BD32F2A5E5000B7DC55 /* PadelCore in Frameworks */ = {isa = PBXBuildFile; productRef = 95FB7BD22F2A5E5000B7DC55 /* PadelCore */; };
+		95FB7BD52F2A5E5700B7DC55 /* PadelCore in Frameworks */ = {isa = PBXBuildFile; productRef = 95FB7BD42F2A5E5700B7DC55 /* PadelCore */; };
+		95FB7BD72F2A5E5C00B7DC55 /* PadelCore in Frameworks */ = {isa = PBXBuildFile; productRef = 95FB7BD62F2A5E5C00B7DC55 /* PadelCore */; };
+		95FB7BD92F2A5E6100B7DC55 /* PadelCore in Frameworks */ = {isa = PBXBuildFile; productRef = 95FB7BD82F2A5E6100B7DC55 /* PadelCore */; };
+		95FB7BDB2F2A5E6600B7DC55 /* PadelCore in Frameworks */ = {isa = PBXBuildFile; productRef = 95FB7BDA2F2A5E6600B7DC55 /* PadelCore */; };
+		95FB7BDD2F2A5E6A00B7DC55 /* PadelCore in Frameworks */ = {isa = PBXBuildFile; productRef = 95FB7BDC2F2A5E6A00B7DC55 /* PadelCore */; };
+		95FB7BE02F2A615D00B7DC55 /* MatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7BDE2F2A615D00B7DC55 /* MatchViewModel.swift */; };
+		95FB7BE12F2A615D00B7DC55 /* MatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7BDE2F2A615D00B7DC55 /* MatchViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +77,7 @@
 		95FB7B8E2F2A5A4C00B7DC55 /* PadeliOS Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PadeliOS Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		95FB7B9D2F2A5A4D00B7DC55 /* PadeliOS Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PadeliOS Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		95FB7BA72F2A5A4D00B7DC55 /* PadeliOS Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PadeliOS Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		95FB7BDE2F2A615D00B7DC55 /* MatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -109,6 +118,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				95FB7BD32F2A5E5000B7DC55 /* PadelCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,6 +126,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				95FB7BD52F2A5E5700B7DC55 /* PadelCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,6 +134,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				95FB7BD72F2A5E5C00B7DC55 /* PadelCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -130,6 +142,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				95FB7BD92F2A5E6100B7DC55 /* PadelCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,6 +150,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				95FB7BDB2F2A5E6600B7DC55 /* PadelCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,6 +158,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				95FB7BDD2F2A5E6A00B7DC55 /* PadelCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -153,12 +168,14 @@
 		95FB7B622F2A5A4C00B7DC55 = {
 			isa = PBXGroup;
 			children = (
+				95FB7BDF2F2A615D00B7DC55 /* Shared */,
 				95FB7B6D2F2A5A4C00B7DC55 /* PadeliOS */,
 				95FB7B7B2F2A5A4C00B7DC55 /* PadeliOSTests */,
 				95FB7B852F2A5A4C00B7DC55 /* PadeliOSUITests */,
 				95FB7B922F2A5A4C00B7DC55 /* PadeliOS Watch App */,
 				95FB7BA02F2A5A4D00B7DC55 /* PadeliOS Watch AppTests */,
 				95FB7BAA2F2A5A4D00B7DC55 /* PadeliOS Watch AppUITests */,
+				95FB7BD12F2A5E5000B7DC55 /* Frameworks */,
 				95FB7B6C2F2A5A4C00B7DC55 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -174,6 +191,21 @@
 				95FB7BA72F2A5A4D00B7DC55 /* PadeliOS Watch AppUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		95FB7BD12F2A5E5000B7DC55 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		95FB7BDF2F2A615D00B7DC55 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				95FB7BDE2F2A615D00B7DC55 /* MatchViewModel.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -198,6 +230,7 @@
 			);
 			name = PadeliOS;
 			packageProductDependencies = (
+				95FB7BD22F2A5E5000B7DC55 /* PadelCore */,
 			);
 			productName = PadeliOS;
 			productReference = 95FB7B6B2F2A5A4C00B7DC55 /* PadeliOS.app */;
@@ -221,6 +254,7 @@
 			);
 			name = PadeliOSTests;
 			packageProductDependencies = (
+				95FB7BD42F2A5E5700B7DC55 /* PadelCore */,
 			);
 			productName = PadeliOSTests;
 			productReference = 95FB7B782F2A5A4C00B7DC55 /* PadeliOSTests.xctest */;
@@ -244,6 +278,7 @@
 			);
 			name = PadeliOSUITests;
 			packageProductDependencies = (
+				95FB7BD62F2A5E5C00B7DC55 /* PadelCore */,
 			);
 			productName = PadeliOSUITests;
 			productReference = 95FB7B822F2A5A4C00B7DC55 /* PadeliOSUITests.xctest */;
@@ -266,6 +301,7 @@
 			);
 			name = "PadeliOS Watch App";
 			packageProductDependencies = (
+				95FB7BD82F2A5E6100B7DC55 /* PadelCore */,
 			);
 			productName = "PadeliOS Watch App";
 			productReference = 95FB7B8E2F2A5A4C00B7DC55 /* PadeliOS Watch App.app */;
@@ -289,6 +325,7 @@
 			);
 			name = "PadeliOS Watch AppTests";
 			packageProductDependencies = (
+				95FB7BDA2F2A5E6600B7DC55 /* PadelCore */,
 			);
 			productName = "PadeliOS Watch AppTests";
 			productReference = 95FB7B9D2F2A5A4D00B7DC55 /* PadeliOS Watch AppTests.xctest */;
@@ -312,6 +349,7 @@
 			);
 			name = "PadeliOS Watch AppUITests";
 			packageProductDependencies = (
+				95FB7BDC2F2A5E6A00B7DC55 /* PadelCore */,
 			);
 			productName = "PadeliOS Watch AppUITests";
 			productReference = 95FB7BA72F2A5A4D00B7DC55 /* PadeliOS Watch AppUITests.xctest */;
@@ -360,6 +398,9 @@
 			);
 			mainGroup = 95FB7B622F2A5A4C00B7DC55;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				95FB7BC42F2A5A8900B7DC55 /* XCLocalSwiftPackageReference "../../PadelCore" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 95FB7B6C2F2A5A4C00B7DC55 /* Products */;
 			projectDirPath = "";
@@ -425,6 +466,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				95FB7BE12F2A615D00B7DC55 /* MatchViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -446,6 +488,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				95FB7BE02F2A615D00B7DC55 /* MatchViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -985,6 +1028,46 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		95FB7BC42F2A5A8900B7DC55 /* XCLocalSwiftPackageReference "../../PadelCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../PadelCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		95FB7BD22F2A5E5000B7DC55 /* PadelCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 95FB7BC42F2A5A8900B7DC55 /* XCLocalSwiftPackageReference "../../PadelCore" */;
+			productName = PadelCore;
+		};
+		95FB7BD42F2A5E5700B7DC55 /* PadelCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 95FB7BC42F2A5A8900B7DC55 /* XCLocalSwiftPackageReference "../../PadelCore" */;
+			productName = PadelCore;
+		};
+		95FB7BD62F2A5E5C00B7DC55 /* PadelCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 95FB7BC42F2A5A8900B7DC55 /* XCLocalSwiftPackageReference "../../PadelCore" */;
+			productName = PadelCore;
+		};
+		95FB7BD82F2A5E6100B7DC55 /* PadelCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 95FB7BC42F2A5A8900B7DC55 /* XCLocalSwiftPackageReference "../../PadelCore" */;
+			productName = PadelCore;
+		};
+		95FB7BDA2F2A5E6600B7DC55 /* PadelCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 95FB7BC42F2A5A8900B7DC55 /* XCLocalSwiftPackageReference "../../PadelCore" */;
+			productName = PadelCore;
+		};
+		95FB7BDC2F2A5E6A00B7DC55 /* PadelCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 95FB7BC42F2A5A8900B7DC55 /* XCLocalSwiftPackageReference "../../PadelCore" */;
+			productName = PadelCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 95FB7B632F2A5A4C00B7DC55 /* Project object */;
 }
