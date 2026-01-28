@@ -5,90 +5,142 @@ struct MatchSummaryView: View {
     let state: MatchState
     let onDismiss: () -> Void
     
+    var winner: Int {
+        state.team1Sets > state.team2Sets ? 1 : 2
+    }
+    
     var body: some View {
         ZStack {
-            // Background - Dark Mode
-            Rectangle()
-                .fill(Color.black.gradient)
-                .ignoresSafeArea()
+            // Background Layer
+            Color.black.ignoresSafeArea()
             
-            VStack(spacing: 40) {
-                Text("MATCH COMPLETED")
-                    .font(.system(.title2, design: .rounded, weight: .black))
-                    .foregroundColor(.yellow) // High visibility highlight
-                    .padding(.top, 40)
-                
-                // The Grid (TV Broadcast Style)
-                VStack(spacing: 0) {
-                    ScoreRow(name: "Galán/Lebrón", results: state.completedSets.map { $0.team1Games })
-                    
-                    Rectangle()
-                        .fill(.white.opacity(0.1))
-                        .frame(height: 1)
-                        .padding(.horizontal, 20)
-                    
-                    ScoreRow(name: "Coello/Tapia", results: state.completedSets.map { $0.team2Games })
+            // Subtle Gradient Accent
+            LinearGradient(
+                colors: [Color.yellow.opacity(0.08), Color.clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Compact Header
+                HStack {
+                    Text("Match result")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundColor(.white.opacity(0.8))
+                    Spacer()
+                    Image(systemName: "circle.fill")
+                        .font(.system(size: 6))
+                        .foregroundColor(.yellow)
                 }
-                .padding(.vertical)
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(20)
-                .padding(.horizontal)
+                .padding(.horizontal, 24)
+                .padding(.top, 25)
+                .padding(.bottom, 20)
+                
+                // Compact Scoreboard (Glassmorphism)
+                VStack(spacing: 0) {
+                    ScoreboardRow(
+                        label: "TEAM 1",
+                        results: state.completedSets.map { $0.team1Games },
+                        opponentResults: state.completedSets.map { $0.team2Games },
+                        isMatchWinner: winner == 1
+                    )
+                    
+                    Divider()
+                        .background(Color.white.opacity(0.1))
+                    
+                    ScoreboardRow(
+                        label: "TEAM 2",
+                        results: state.completedSets.map { $0.team2Games },
+                        opponentResults: state.completedSets.map { $0.team1Games },
+                        isMatchWinner: winner == 2
+                    )
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.white.opacity(0.05))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        )
+                )
+                .padding(.horizontal, 12)
                 
                 Spacer()
                 
-                // OK / Reset Button
+                // Actions
                 Button(action: onDismiss) {
-                    Text("OK, START NEW MATCH")
-                        .font(.system(.headline, design: .rounded, weight: .bold))
+                    Text("DONE")
+                        .font(.system(size: 14, weight: .black, design: .rounded))
                         .foregroundColor(.black)
                         .frame(maxWidth: .infinity)
-                        .padding()
+                        .padding(.vertical, 12)
                         .background(Color.yellow.gradient)
                         .cornerRadius(12)
                 }
-                .padding(.horizontal, 40)
-                .padding(.bottom, 40)
+                .buttonStyle(.plain)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 20)
             }
         }
+        .preferredColorScheme(.dark)
+        .toolbar(.hidden, for: .navigationBar)
+        .navigationBarBackButtonHidden(true)
     }
 }
 
-struct ScoreRow: View {
-    let name: String
+struct ScoreboardRow: View {
+    let label: String
     let results: [Int]
+    let opponentResults: [Int]
+    let isMatchWinner: Bool
     
     var body: some View {
         HStack(spacing: 0) {
-            Text(name.uppercased())
-                .font(.system(.headline, design: .rounded, weight: .bold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading, 30)
+            // Team Label
+            HStack(spacing: 8) {
+                ZStack {
+                    if isMatchWinner {
+                        Image(systemName: "trophy.fill")
+                            .font(.system(size: 10))
+                            .foregroundColor(.yellow)
+                    }
+                }
+                .frame(width: 12)
+                
+                Text(label)
+                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .foregroundColor(isMatchWinner ? .white : .white.opacity(0.5))
+            }
+            .padding(.leading, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
             
-            HStack(spacing: 20) {
-                ForEach(0..<3) { index in
-                    Text(index < results.count ? "\(results[index])" : "-")
-                        .font(.system(size: 32, weight: .black, design: .monospaced))
-                        .foregroundColor(index < results.count ? .white : .white.opacity(0.3))
-                        .underline(index < results.count && isWinner(index: index))
-                        .frame(width: 40)
+            // Results
+            HStack(spacing: 15) {
+                ForEach(0..<max(3, results.count), id: \.self) { index in
+                    let score = index < results.count ? results[index] : -1
+                    let opponentScore = index < opponentResults.count ? opponentResults[index] : -1
+                    
+                    Text(score >= 0 ? "\(score)" : "–")
+                        .font(.system(size: 24, weight: .black, design: .monospaced))
+                        .foregroundColor(score >= 0 ? (score > opponentScore ? .yellow : .white) : .white.opacity(0.15))
+                        .frame(width: 25)
                 }
             }
-            .padding(.trailing, 30)
+            .padding(.trailing, 15)
         }
-        .frame(height: 80)
-    }
-    
-    private func isWinner(index: Int) -> Bool {
-        // Logic to underline winning set would go here
-        return false 
+        .frame(height: 60)
     }
 }
 
 #Preview {
-    MatchSummaryView(state: MatchState(completedSets: [
-        SetResult(team1Games: 5, team2Games: 7),
-        SetResult(team1Games: 6, team2Games: 6),
-        SetResult(team1Games: 2, team2Games: 3)
-    ]), onDismiss: {})
+    MatchSummaryView(state: MatchState(
+        team1Sets: 2,
+        team2Sets: 1,
+        completedSets: [
+            SetResult(team1Games: 6, team2Games: 4),
+            SetResult(team1Games: 4, team2Games: 6),
+            SetResult(team1Games: 7, team2Games: 5)
+        ]
+    ), onDismiss: {})
 }
