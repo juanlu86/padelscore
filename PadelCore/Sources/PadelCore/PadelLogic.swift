@@ -29,20 +29,33 @@ public class PadelLogic {
         case .fifteen:
             if forTeam1 { newState.team1Score = .thirty } else { newState.team2Score = .thirty }
         case .thirty:
-            if forTeam1 { newState.team1Score = .forty } else { newState.team2Score = .forty }
+            if forTeam1 { 
+                newState.team1Score = .forty 
+                if them == .forty { newState.deuceCount += 1 }
+            } else { 
+                newState.team2Score = .forty 
+                if them == .forty { newState.deuceCount += 1 }
+            }
         case .forty:
             if them == .forty {
-                // Deuce -> Advantage
-                if forTeam1 { newState.team1Score = .advantage } else { newState.team2Score = .advantage }
+                // We ARE at 40-40. Check for Golden Point / Star Point Sudden Death
+                if newState.scoringSystem == .goldenPoint || (newState.scoringSystem == .starPoint && newState.deuceCount >= 3) {
+                    newState = winGame(isTeam1: forTeam1, state: newState)
+                } else {
+                    // Standard deuce: Enter Advantage state
+                    if forTeam1 { newState.team1Score = .advantage } else { newState.team2Score = .advantage }
+                }
             } else if them == .advantage {
-                // Back to Deuce
-                if forTeam1 { newState.team2Score = .forty } else { newState.team1Score = .forty }
+                // Return to Deuce from Advantage
+                newState.team1Score = .forty
+                newState.team2Score = .forty
+                newState.deuceCount += 1
             } else {
                 // Win Game
                 newState = winGame(isTeam1: forTeam1, state: newState)
             }
         case .advantage:
-            // Win Game
+            // Win Game normally
             newState = winGame(isTeam1: forTeam1, state: newState)
         case .game:
             break

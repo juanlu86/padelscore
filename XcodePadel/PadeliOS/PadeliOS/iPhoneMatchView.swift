@@ -6,67 +6,92 @@ struct iPhoneMatchView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Match Status Card
-                    VStack(spacing: 16) {
-                        HStack {
-                            TeamScoreCard(
-                                name: "Galán/Lebrón",
-                                score: viewModel.state.isTieBreak ? "\(viewModel.state.team1TieBreakPoints)" : viewModel.state.team1Score.rawValue,
-                                games: viewModel.state.team1Games,
-                                sets: viewModel.state.team1Sets,
-                                color: .green
-                            )
-                            
-                            VStack {
-                                if viewModel.state.isTieBreak {
-                                    Text("TIE-BREAK")
-                                        .font(.system(size: 8, weight: .black))
-                                        .foregroundColor(.yellow)
+            ZStack {
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Match Status Card
+                        VStack(spacing: 16) {
+                            HStack {
+                                TeamScoreCard(
+                                    name: "Galán/Lebrón",
+                                    score: viewModel.state.isTieBreak ? "\(viewModel.state.team1TieBreakPoints)" : viewModel.state.team1Score.rawValue,
+                                    games: viewModel.state.team1Games,
+                                    sets: viewModel.state.team1Sets,
+                                    color: .green
+                                )
+                                
+                                VStack {
+                                    if viewModel.state.isTieBreak {
+                                        Text("TIE-BREAK")
+                                            .font(.system(size: 8, weight: .black))
+                                            .foregroundColor(.yellow)
+                                    }
+                                    Text("VS")
+                                        .font(.system(.headline, design: .default, weight: .black))
+                                        .foregroundColor(.secondary.opacity(0.5))
                                 }
-                                Text("VS")
-                                    .font(.system(.headline, design: .default, weight: .black))
-                                    .foregroundColor(.secondary.opacity(0.5))
+                                
+                                TeamScoreCard(
+                                    name: "Coello/Tapia",
+                                    score: viewModel.state.isTieBreak ? "\(viewModel.state.team2TieBreakPoints)" : viewModel.state.team2Score.rawValue,
+                                    games: viewModel.state.team2Games,
+                                    sets: viewModel.state.team2Sets,
+                                    color: .blue
+                                )
                             }
+                        }
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                        
+                        // Quick Controls
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Quick Actions")
+                                .font(.headline)
+                                .padding(.horizontal)
                             
-                            TeamScoreCard(
-                                name: "Coello/Tapia",
-                                score: viewModel.state.isTieBreak ? "\(viewModel.state.team2TieBreakPoints)" : viewModel.state.team2Score.rawValue,
-                                games: viewModel.state.team2Games,
-                                sets: viewModel.state.team2Sets,
-                                color: .blue
-                            )
+                            HStack(spacing: 12) {
+                                ActionButton(title: "Reset Match", icon: "arrow.counterclockwise", color: .red) {
+                                    viewModel.resetMatch()
+                                }
+                                
+                                ActionButton(title: "Finish Match", icon: "checkmark.circle", color: .green) {
+                                    viewModel.finishMatch()
+                                }
+                                
+                                ActionButton(title: "Undo Point", icon: "arrow.uturn.backward", color: .orange) {
+                                    viewModel.undoPoint()
+                                }
+                                .disabled(!viewModel.canUndo)
+                                .opacity(viewModel.canUndo ? 1.0 : 0.5)
+                            }
+                            .padding(.horizontal)
                         }
                     }
                     .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 24))
-                    
-                    // Quick Controls
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Quick Actions")
-                            .font(.headline)
-                            .padding(.horizontal)
-                        
-                        HStack(spacing: 12) {
-                            ActionButton(title: "Reset Match", icon: "arrow.counterclockwise", color: .red) {
-                                viewModel.resetMatch()
-                            }
-                            
-                            ActionButton(title: "Undo Point", icon: "arrow.uturn.backward", color: .orange) {
-                                viewModel.undoPoint()
-                            }
-                            .disabled(!viewModel.canUndo)
-                            .opacity(viewModel.canUndo ? 1.0 : 0.5)
-                        }
-                        .padding(.horizontal)
-                    }
                 }
-                .padding()
+                .navigationTitle("Match Manager")
+                .background(Color(.systemBackground))
+                
+                // Settings Overlay
+                if !viewModel.isMatchStarted {
+                    MatchSettingsView(viewModel: viewModel) {
+                        withAnimation(.spring()) {
+                            viewModel.startMatch()
+                        }
+                    }
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
+                }
             }
-            .navigationTitle("Match Manager")
-            .background(Color(.systemBackground))
+            .fullScreenCover(isPresented: .init(
+                get: { viewModel.state.isMatchOver },
+                set: { if !$0 { viewModel.resetMatch() } }
+            )) {
+                MatchSummaryView(state: viewModel.state) {
+                    viewModel.resetMatch()
+                }
+            }
         }
     }
 }
