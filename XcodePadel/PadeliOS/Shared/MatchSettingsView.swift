@@ -45,41 +45,30 @@ struct MatchSettingsView: View {
                     .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
                 }
                 .listStyle(.plain)
-                .padding(.top, 2)
                 
-                // Persistent Tie-Break Switch
-                VStack(spacing: 8) {
-                    Divider()
-                        .background(Color.white.opacity(0.1))
-                    
+                // Slim Bottom Controls
+                VStack(spacing: 4) {
                     Toggle(isOn: $viewModel.state.useTieBreak) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("TIE-BREAK")
-                                .font(.system(size: 13, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                            Text(viewModel.state.useTieBreak ? "Enabled at 6-6." : "Long set (2-lead).")
-                                .font(.system(size: 10))
-                                .foregroundColor(.white.opacity(0.5))
-                        }
+                        Text("TIE-BREAK")
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .foregroundColor(.white.opacity(0.8))
                     }
                     .tint(.yellow)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 4)
+                    .scaleEffect(0.9)
+                    .padding(.horizontal, 8)
+                    
+                    Button(action: onStart) {
+                        Text("START MATCH")
+                            .font(.system(size: 13, weight: .black, design: .rounded))
+                            .foregroundColor(.black)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.yellow.gradient)
+                            .cornerRadius(8)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 6)
                 }
-                .padding(.bottom, 8)
-                
-                // Compact Button without system borders
-                Button(action: onStart) {
-                    Text("START MATCH")
-                        .font(.system(size: 14, weight: .black, design: .rounded))
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(Color.yellow.gradient)
-                        .cornerRadius(10)
-                }
-                .buttonStyle(.plain)
-                .padding(.horizontal, 4)
                 .padding(.bottom, 2)
             }
         }
