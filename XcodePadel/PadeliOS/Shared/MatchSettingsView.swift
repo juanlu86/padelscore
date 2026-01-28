@@ -10,69 +10,112 @@ struct MatchSettingsView: View {
             Color.black.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                List {
-                    SettingsCard(
-                        title: "STANDARD",
-                        description: "Normal deuce.",
-                        system: .standard,
-                        current: viewModel.state.scoringSystem
-                    ) {
-                        viewModel.state.scoringSystem = .standard
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
-                    
-                    SettingsCard(
-                        title: "GOLDEN PT",
-                        description: "Sudden death.",
-                        system: .goldenPoint,
-                        current: viewModel.state.scoringSystem
-                    ) {
-                        viewModel.state.scoringSystem = .goldenPoint
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
-                    
-                    SettingsCard(
-                        title: "STAR POINT",
-                        description: "Sudden death at 3rd deuce.",
-                        system: .starPoint,
-                        current: viewModel.state.scoringSystem
-                    ) {
-                        viewModel.state.scoringSystem = .starPoint
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
-                }
-                .listStyle(.plain)
-                
-                // Slim Bottom Controls
-                VStack(spacing: 2) {
-                    Toggle(isOn: $viewModel.state.useTieBreak) {
-                        Text("TIE-BREAK")
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
-                            .foregroundColor(.white.opacity(0.8))
-                    }
-                    .tint(.yellow)
-                    .scaleEffect(0.9)
-                    .padding(.horizontal, 8)
-                    
-                    Button(action: onStart) {
-                        Text("START MATCH")
-                            .font(.system(size: 13, weight: .black, design: .rounded))
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(Color.yellow.gradient)
-                            .cornerRadius(8)
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, 6)
-                }
-                .padding(.bottom, 0)
+                pickerSection
+                controlsSection
             }
         }
         .preferredColorScheme(.dark)
+    }
+    
+    private var pickerSection: some View {
+        GeometryReader { proxy in
+            let center = proxy.size.height / 2
+            
+            ZStack {
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 8) {
+                        Color.clear.frame(height: center - 25)
+                        
+                        ForEach(ScoringSystem.allCases, id: \.self) { system in
+                            pickerRow(for: system, in: center)
+                        }
+                        
+                        Color.clear.frame(height: center - 25)
+                    }
+                    .scrollTargetLayout()
+                }
+                .scrollTargetBehavior(.viewAligned)
+                .scrollPosition(id: Binding(
+                    get: { viewModel.state.scoringSystem },
+                    set: { if let s = $0, viewModel.state.scoringSystem != s {
+                        viewModel.state.scoringSystem = s 
+                    }}
+                ))
+                .coordinateSpace(name: "picker")
+                
+                selectionOverlay
+            }
+        }
+        .frame(maxHeight: .infinity)
+    }
+    
+    private func pickerRow(for system: ScoringSystem, in center: CGFloat) -> some View {
+        SettingsCard(
+            title: system.rawValue.uppercased(),
+            description: systemDescription(for: system),
+            system: system,
+            current: viewModel.state.scoringSystem
+        ) {
+            withAnimation(.spring(duration: 0.3)) {
+                viewModel.state.scoringSystem = system
+            }
+        }
+        .frame(height: 50)
+        .visualEffect { content, proxy in
+            let midY = proxy.frame(in: .named("picker")).midY
+            let verticalDiff = abs(midY - center)
+            let scale = max(0.9, 1.15 - (verticalDiff / 300))
+            let opacity = max(0.5, 1.0 - (verticalDiff / 150))
+            
+            return content
+                .scaleEffect(scale)
+                .opacity(opacity)
+        }
+    }
+    
+    private var selectionOverlay: some View {
+        RoundedRectangle(cornerRadius: 12)
+            .stroke(Color.yellow.opacity(0.4), lineWidth: 2)
+            .frame(height: 56)
+            .padding(.horizontal, 6)
+            .allowsHitTesting(false)
+    }
+    
+    private var controlsSection: some View {
+        VStack(spacing: 6) {
+            Divider().background(Color.white.opacity(0.1))
+            
+            Toggle(isOn: $viewModel.state.useTieBreak) {
+                Text("TIE-BREAK")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundColor(.white.opacity(0.7))
+            }
+            .tint(.yellow)
+            .scaleEffect(0.85)
+            .padding(.horizontal, 12)
+            
+            Button(action: onStart) {
+                Text("START MATCH")
+                    .font(.system(size: 14, weight: .black, design: .rounded))
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(Color.yellow.gradient)
+                    .cornerRadius(10)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 8)
+            .padding(.bottom, 6)
+        }
+        .background(Color.black)
+    }
+    
+    private func systemDescription(for system: ScoringSystem) -> String {
+        switch system {
+        case .standard: return "Standard rules."
+        case .goldenPoint: return "Sudden death 40-40."
+        case .starPoint: return "3rd deuce finish."
+        }
     }
 }
 
