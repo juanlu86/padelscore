@@ -35,7 +35,7 @@ struct MatchSettingsView: View {
                     
                     SettingsCard(
                         title: "STAR POINT",
-                        description: "3rd deuce finish.",
+                        description: "Sudden death at 3rd deuce.",
                         system: .starPoint,
                         current: viewModel.state.scoringSystem
                     ) {
@@ -47,7 +47,7 @@ struct MatchSettingsView: View {
                 .listStyle(.plain)
                 
                 // Slim Bottom Controls
-                VStack(spacing: 4) {
+                VStack(spacing: 2) {
                     Toggle(isOn: $viewModel.state.useTieBreak) {
                         Text("TIE-BREAK")
                             .font(.system(size: 11, weight: .bold, design: .rounded))
@@ -69,7 +69,7 @@ struct MatchSettingsView: View {
                     .buttonStyle(.plain)
                     .padding(.horizontal, 6)
                 }
-                .padding(.bottom, 2)
+                .padding(.bottom, 0)
             }
         }
         .preferredColorScheme(.dark)
