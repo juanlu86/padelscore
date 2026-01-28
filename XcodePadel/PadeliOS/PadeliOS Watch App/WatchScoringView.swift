@@ -17,7 +17,7 @@ struct WatchScoringView: View {
                     // Page 1: Scoring
                     VStack(spacing: 8) {
                         // Sets Header
-                        HStack(spacing: 20) {
+                        HStack(spacing: 10) {
                             Text("Sets: \(viewModel.state.team1Sets)")
                             Text("-")
                             Text("\(viewModel.state.team2Sets)")
@@ -96,14 +96,15 @@ struct ScoreColumn: View {
     
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 2) {
-                Text(team)
-                    .font(.system(.caption2, weight: .medium))
-                    .foregroundColor(.secondary)
+            VStack(spacing: 0) {
+                Text(team.prefix(6)) // Abbreviate to T1/T2 style if needed
+                    .font(.system(size: 7, weight: .black))
+                    .foregroundColor(.secondary.opacity(0.8))
                 Text(score)
-                    .font(.system(size: 54, weight: .black, design: .rounded))
+                    .font(.system(size: 180, weight: .black, design: .rounded))
                     .foregroundColor(color)
-                    .minimumScaleFactor(0.8)
+                    .scaleEffect(x: 0.85, y: 1.15) // Even more aggressive "tall" look
+                    .minimumScaleFactor(0.4)
             }
         }
         .buttonStyle(.plain)
