@@ -100,6 +100,7 @@ public class PadelLogic {
         newState.team1TieBreakPoints = 0
         newState.team2TieBreakPoints = 0
         newState.isTieBreak = false
+        newState.deuceCount = 0
         
         // Check for Tie-break trigger (6-6)
         if newState.useTieBreak && !wasTieBreak && newState.team1Games == 6 && newState.team2Games == 6 {

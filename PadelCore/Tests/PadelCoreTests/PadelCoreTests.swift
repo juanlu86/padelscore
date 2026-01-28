@@ -191,4 +191,32 @@ final class PadelLogicTests: XCTestCase {
         XCTAssertEqual(state.team1Games, 9)
         XCTAssertEqual(state.team1Score, .zero)
     }
+
+    func testStarPointResetsBetweenGames() {
+        var state = MatchState()
+        state.scoringSystem = .starPoint
+        
+        // GAME 1: Reach 3rd deuce and win (Star Point)
+        state.team1Score = .forty
+        state.team2Score = .forty
+        state.deuceCount = 3
+        
+        state = logic.scorePoint(forTeam1: true, currentState: state)
+        XCTAssertEqual(state.team1Games, 1)
+        XCTAssertEqual(state.deuceCount, 0, "Deuce count must reset after game win")
+        
+        // GAME 2: Reach 1st deuce (40-40)
+        state.team1Score = .thirty
+        state.team2Score = .forty
+        state = logic.scorePoint(forTeam1: true, currentState: state)
+        
+        XCTAssertEqual(state.team1Score, .forty)
+        XCTAssertEqual(state.team2Score, .forty)
+        XCTAssertEqual(state.deuceCount, 1, "Next game should start with fresh deuce counting (1st deuce)")
+        
+        // It should NOT be a sudden death win yet
+        state = logic.scorePoint(forTeam1: true, currentState: state)
+        XCTAssertEqual(state.team1Score, .advantage, "Should enter advantage, not win game immediately")
+        XCTAssertEqual(state.team1Games, 1, "Game 2 should still be in progress")
+    }
 }
