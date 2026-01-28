@@ -34,8 +34,8 @@ struct MatchSummaryView: View {
                         .foregroundColor(.yellow)
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 25)
-                .padding(.bottom, 20)
+                .padding(.top, 15)
+                .padding(.bottom, 8)
                 
                 // Compact Scoreboard (Glassmorphism)
                 VStack(spacing: 0) {
@@ -109,8 +109,10 @@ struct ScoreboardRow: View {
                 .frame(width: 12)
                 
                 Text(label)
-                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .font(.system(size: 9, weight: .black, design: .rounded))
                     .foregroundColor(isMatchWinner ? .white : .white.opacity(0.5))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
             .padding(.leading, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
