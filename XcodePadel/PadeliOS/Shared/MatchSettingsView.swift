@@ -47,6 +47,27 @@ struct MatchSettingsView: View {
                 .listStyle(.plain)
                 .padding(.top, 2)
                 
+                // Persistent Tie-Break Switch
+                VStack(spacing: 8) {
+                    Divider()
+                        .background(Color.white.opacity(0.1))
+                    
+                    Toggle(isOn: $viewModel.state.useTieBreak) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("TIE-BREAK")
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            Text(viewModel.state.useTieBreak ? "Enabled at 6-6." : "Long set (2-lead).")
+                                .font(.system(size: 10))
+                                .foregroundColor(.white.opacity(0.5))
+                        }
+                    }
+                    .tint(.yellow)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 4)
+                }
+                .padding(.bottom, 8)
+                
                 // Compact Button without system borders
                 Button(action: onStart) {
                     Text("START MATCH")

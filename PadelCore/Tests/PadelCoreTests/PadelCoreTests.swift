@@ -2,36 +2,26 @@ import XCTest
 @testable import PadelCore
 
 final class PadelLogicTests: XCTestCase {
-    var logic: PadelLogic!
-    
-    override func setUp() {
-        super.setUp()
-        logic = PadelLogic()
-    }
+    let logic = PadelLogic()
     
     func testSimplePoints() {
         var state = MatchState()
         
-        // 0 -> 15
         state = logic.scorePoint(forTeam1: true, currentState: state)
         XCTAssertEqual(state.team1Score, .fifteen)
-        XCTAssertEqual(state.team2Score, .zero)
         
-        // 15 -> 30
         state = logic.scorePoint(forTeam1: true, currentState: state)
         XCTAssertEqual(state.team1Score, .thirty)
         
-        // 30 -> 40
-        state = logic.scorePoint(forTeam1: true, currentState: state)
-        XCTAssertEqual(state.team1Score, .forty)
+        state = logic.scorePoint(forTeam1: false, currentState: state)
+        XCTAssertEqual(state.team2Score, .fifteen)
     }
     
     func testWinGame() {
-        var state = MatchState(team1Score: .forty, team1Games: 0)
+        var state = MatchState()
+        state.team1Score = .forty
         
-        // 40 -> Win Game (1-0)
         state = logic.scorePoint(forTeam1: true, currentState: state)
-        
         XCTAssertEqual(state.team1Games, 1)
         XCTAssertEqual(state.team1Score, .zero)
         XCTAssertEqual(state.team2Score, .zero)
@@ -43,12 +33,11 @@ final class PadelLogicTests: XCTestCase {
         
         // Win Game -> Win Set (6-0)
         state = logic.scorePoint(forTeam1: true, currentState: state)
-        
         XCTAssertEqual(state.team1Sets, 1)
-        XCTAssertEqual(state.team1Games, 0) // Reset for next set
+        XCTAssertEqual(state.team1Games, 0)
         XCTAssertEqual(state.completedSets.count, 1)
-        XCTAssertEqual(state.completedSets[0].team1Games, 6)
-        XCTAssertEqual(state.completedSets[0].team2Games, 0)
+        XCTAssertEqual(state.completedSets.last?.team1Games, 6)
+        XCTAssertEqual(state.completedSets.last?.team2Games, 0)
     }
     
     func testNoSetWinAt6_5() {
@@ -57,10 +46,9 @@ final class PadelLogicTests: XCTestCase {
         
         // Win Game -> 6-5 (No set win yet, need 2 game lead or tie-break)
         state = logic.scorePoint(forTeam1: true, currentState: state)
-        
-        XCTAssertEqual(state.team1Sets, 0)
         XCTAssertEqual(state.team1Games, 6)
         XCTAssertEqual(state.team2Games, 5)
+        XCTAssertEqual(state.team1Sets, 0)
     }
     
     func testSetWinAt7_5() {
@@ -69,9 +57,9 @@ final class PadelLogicTests: XCTestCase {
         
         // Win Game -> 7-5 (Set win)
         state = logic.scorePoint(forTeam1: true, currentState: state)
-        
         XCTAssertEqual(state.team1Sets, 1)
-        XCTAssertEqual(state.completedSets[0].team1Games, 7)
+        XCTAssertEqual(state.completedSets.last?.team1Games, 7)
+        XCTAssertEqual(state.completedSets.last?.team2Games, 5)
     }
     
     func testTieBreakTrigger() {
@@ -80,7 +68,6 @@ final class PadelLogicTests: XCTestCase {
         
         // Team 1 wins game -> 6-6 -> Tie-break
         state = logic.scorePoint(forTeam1: true, currentState: state)
-        
         XCTAssertEqual(state.team1Games, 6)
         XCTAssertEqual(state.team2Games, 6)
         XCTAssertTrue(state.isTieBreak)
@@ -92,10 +79,9 @@ final class PadelLogicTests: XCTestCase {
         
         // Score point -> 7-5 win tie-break -> 7-6 set win
         state = logic.scorePoint(forTeam1: true, currentState: state)
-        
         XCTAssertEqual(state.team1Sets, 1)
-        XCTAssertEqual(state.completedSets[0].team1Games, 7)
-        XCTAssertEqual(state.completedSets[0].team2Games, 6)
+        XCTAssertEqual(state.completedSets.last?.team1Games, 7)
+        XCTAssertEqual(state.completedSets.last?.team2Games, 6)
         XCTAssertFalse(state.isTieBreak)
     }
     
@@ -105,7 +91,6 @@ final class PadelLogicTests: XCTestCase {
         
         // Win Set -> Win Match
         state = logic.scorePoint(forTeam1: true, currentState: state)
-        
         XCTAssertEqual(state.team1Sets, 2)
         XCTAssertTrue(state.isMatchOver)
     }
@@ -154,5 +139,56 @@ final class PadelLogicTests: XCTestCase {
         state = logic.scorePoint(forTeam1: true, currentState: state)
         XCTAssertEqual(state.team1Games, 1)
         XCTAssertEqual(state.team1Score, .zero) // Game won
+    }
+
+    func testSetWinWithoutTieBreak() {
+        var state = MatchState()
+        state.useTieBreak = false
+        state.team1Games = 5
+        state.team2Games = 6
+        state.team1Score = .forty
+        
+        // 1. Team 1 wins game -> 6-6 (No tie-break!)
+        state = logic.scorePoint(forTeam1: true, currentState: state)
+        XCTAssertEqual(state.team1Games, 6)
+        XCTAssertEqual(state.team2Games, 6)
+        XCTAssertFalse(state.isTieBreak)
+        
+        // 2. Team 1 wins game -> 7-6 (No set win yet!)
+        state.team1Score = .forty
+        state = logic.scorePoint(forTeam1: true, currentState: state)
+        XCTAssertEqual(state.team1Games, 7)
+        XCTAssertEqual(state.team2Games, 6)
+        XCTAssertEqual(state.team1Sets, 0)
+        
+        // 3. Team 2 wins game -> 7-7
+        state.team2Score = .forty
+        state = logic.scorePoint(forTeam1: false, currentState: state)
+        XCTAssertEqual(state.team1Games, 7)
+        XCTAssertEqual(state.team2Games, 7)
+        
+        // 4. Team 1 wins two games in a row -> 9-7 (Set win!)
+        state.team1Games = 8
+        state.team2Games = 7
+        state.team1Score = .forty
+        state = logic.scorePoint(forTeam1: true, currentState: state)
+        XCTAssertEqual(state.team1Sets, 1)
+        XCTAssertEqual(state.completedSets.last?.team1Games, 9)
+        XCTAssertEqual(state.completedSets.last?.team2Games, 7)
+    }
+    
+    func testGoldenPointWithLongSet() {
+        var state = MatchState()
+        state.useTieBreak = false
+        state.scoringSystem = .goldenPoint
+        state.team1Games = 8
+        state.team2Games = 8
+        state.team1Score = .forty
+        state.team2Score = .forty
+        
+        // At 8-8, Golden Point still works normally
+        state = logic.scorePoint(forTeam1: true, currentState: state)
+        XCTAssertEqual(state.team1Games, 9)
+        XCTAssertEqual(state.team1Score, .zero)
     }
 }

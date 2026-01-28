@@ -86,6 +86,7 @@ public class PadelLogic {
     
     private func winGame(isTeam1: Bool, state: MatchState) -> MatchState {
         var newState = state
+        let wasTieBreak = state.isTieBreak
         
         if isTeam1 {
             newState.team1Games += 1
@@ -101,7 +102,7 @@ public class PadelLogic {
         newState.isTieBreak = false
         
         // Check for Tie-break trigger (6-6)
-        if newState.team1Games == 6 && newState.team2Games == 6 {
+        if newState.useTieBreak && !wasTieBreak && newState.team1Games == 6 && newState.team2Games == 6 {
             newState.isTieBreak = true
             return newState
         }
@@ -110,8 +111,10 @@ public class PadelLogic {
         let usGames = isTeam1 ? newState.team1Games : newState.team2Games
         let themGames = isTeam1 ? newState.team2Games : newState.team1Games
         
-        // A set is won at 6 games (with 2 diff) OR at 7-5 or 7-6
-        if (usGames >= 6 && (usGames - themGames >= 2)) || usGames == 7 {
+        // Set win condition:
+        // 1. Just won a tie-break (7-6)
+        // 2. Won by 2 games and have at least 6 games (6-0..6-4, 7-5, 8-6, etc.)
+        if wasTieBreak || (usGames >= 6 && (usGames - themGames >= 2)) {
             newState = winSet(isTeam1: isTeam1, state: newState)
         }
         
