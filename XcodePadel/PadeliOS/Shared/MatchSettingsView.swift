@@ -10,68 +10,59 @@ struct MatchSettingsView: View {
             Color.black.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                VStack(spacing: 4) {
-                    Text("MATCH SETTINGS")
-                        .font(.system(.subheadline, design: .rounded, weight: .black))
-                        .foregroundColor(.yellow)
-                    
-                    Text("Select Scoring System")
-                        .font(.system(size: 10))
-                        .foregroundColor(.white.opacity(0.8))
-                }
-                .padding(.top, 10)
-                .padding(.bottom, 8)
-                
                 List {
                     SettingsCard(
                         title: "STANDARD",
-                        description: "Normal deuce/advantage.",
+                        description: "Normal deuce.",
                         system: .standard,
                         current: viewModel.state.scoringSystem
                     ) {
                         viewModel.state.scoringSystem = .standard
                     }
                     .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                    .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
                     
                     SettingsCard(
-                        title: "GOLDEN POINT",
-                        description: "Sudden death at 40-40.",
+                        title: "GOLDEN PT",
+                        description: "Sudden death.",
                         system: .goldenPoint,
                         current: viewModel.state.scoringSystem
                     ) {
                         viewModel.state.scoringSystem = .goldenPoint
                     }
                     .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                    .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
                     
                     SettingsCard(
                         title: "STAR POINT",
-                        description: "Match ends at 3rd deuce.",
+                        description: "3rd deuce finish.",
                         system: .starPoint,
                         current: viewModel.state.scoringSystem
                     ) {
                         viewModel.state.scoringSystem = .starPoint
                     }
                     .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                    .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
                 }
                 .listStyle(.plain)
+                .padding(.top, 2)
                 
+                // Compact Button without system borders
                 Button(action: onStart) {
                     Text("START MATCH")
-                        .font(.system(.headline, design: .rounded, weight: .bold))
+                        .font(.system(size: 14, weight: .black, design: .rounded))
                         .foregroundColor(.black)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
+                        .padding(.vertical, 10)
                         .background(Color.yellow.gradient)
-                        .cornerRadius(12)
+                        .cornerRadius(10)
                 }
-                .padding(.horizontal, 10)
-                .padding(.bottom, 10)
+                .buttonStyle(.plain)
+                .padding(.horizontal, 4)
+                .padding(.bottom, 2)
             }
         }
-        .preferredColorScheme(.dark) // Force dark mode for this view
+        .preferredColorScheme(.dark)
     }
 }
 
@@ -86,31 +77,31 @@ struct SettingsCard: View {
     
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 HStack {
                     Text(title)
-                        .font(.system(.headline, design: .rounded, weight: .bold))
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                     Spacer()
                     if isSelected {
                         Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 12))
                             .foregroundColor(.yellow)
                     }
                 }
                 
                 Text(description)
-                    .font(.system(size: 11))
-                    .foregroundColor(.white.opacity(0.6))
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .font(.system(size: 10))
+                    .foregroundColor(.white.opacity(0.5))
+                    .lineLimit(1)
             }
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(isSelected ? Color.yellow.opacity(0.15) : Color.white.opacity(0.08))
-            .cornerRadius(12)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .background(isSelected ? Color.yellow.opacity(0.12) : Color.white.opacity(0.06))
+            .cornerRadius(8)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.yellow : Color.clear, lineWidth: 2)
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isSelected ? Color.yellow : Color.clear, lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)
