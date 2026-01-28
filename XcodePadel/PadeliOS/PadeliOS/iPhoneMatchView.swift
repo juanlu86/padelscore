@@ -111,10 +111,10 @@ struct TeamScoreCard: View {
             Button(action: onTap) {
                 Circle()
                     .fill(color.gradient)
-                    .frame(width: 60.0, height: 60.0)
+                    .frame(width: 110.0, height: 110.0)
                     .overlay {
                         Text(score)
-                            .font(.system(.title2, design: .rounded, weight: .bold))
+                            .font(.system(size: 44, weight: .black, design: .rounded))
                             .foregroundColor(.white)
                     }
             }

@@ -50,20 +50,20 @@ struct WatchScoringView: View {
                         
                         Spacer()
                         
-                        // Undo Button (Center Bottom)
+                        // Undo Button (Full Width Pill)
                         Button(action: { viewModel.undoPoint() }) {
-                            VStack(spacing: 2) {
-                                Image(systemName: "arrow.uturn.backward.circle.fill")
-                                    .resizable()
-                                    .frame(width: 24.0, height: 24.0)
-                                Text("UNDO")
-                                    .font(.system(size: 8, weight: .bold))
-                            }
-                            .foregroundColor(viewModel.canUndo ? .orange : .gray.opacity(0.3))
+                            Image(systemName: "arrow.uturn.backward")
+                                .font(.system(size: 18, weight: .black))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 36)
+                                .background(viewModel.canUndo ? Color.orange.opacity(0.2) : Color.gray.opacity(0.1))
+                                .cornerRadius(18)
+                                .foregroundColor(viewModel.canUndo ? .orange : .gray.opacity(0.3))
                         }
                         .buttonStyle(.plain)
                         .disabled(!viewModel.canUndo)
-                        .padding(.bottom, 5)
+                        .padding(.horizontal, 4)
+                        .padding(.bottom, 2)
                     }
                     .containerBackground(Color.black.gradient, for: .navigation)
                     .tag(0)
@@ -101,8 +101,9 @@ struct ScoreColumn: View {
                     .font(.system(.caption2, weight: .medium))
                     .foregroundColor(.secondary)
                 Text(score)
-                    .font(.system(.title, design: .rounded, weight: .bold))
+                    .font(.system(size: 54, weight: .black, design: .rounded))
                     .foregroundColor(color)
+                    .minimumScaleFactor(0.8)
             }
         }
         .buttonStyle(.plain)
