@@ -17,7 +17,8 @@ struct iPhoneMatchView: View {
                                     score: viewModel.state.isTieBreak ? "\(viewModel.state.team1TieBreakPoints)" : viewModel.state.team1Score.rawValue,
                                     games: viewModel.state.team1Games,
                                     sets: viewModel.state.team1Sets,
-                                    color: .green
+                                    color: .green,
+                                    onTap: { viewModel.scorePoint(forTeam1: true) }
                                 )
                                 
                                 VStack {
@@ -36,7 +37,8 @@ struct iPhoneMatchView: View {
                                     score: viewModel.state.isTieBreak ? "\(viewModel.state.team2TieBreakPoints)" : viewModel.state.team2Score.rawValue,
                                     games: viewModel.state.team2Games,
                                     sets: viewModel.state.team2Sets,
-                                    color: .blue
+                                    color: .blue,
+                                    onTap: { viewModel.scorePoint(forTeam1: false) }
                                 )
                             }
                         }
@@ -102,17 +104,21 @@ struct TeamScoreCard: View {
     let games: Int
     let sets: Int
     let color: Color
+    let onTap: () -> Void
     
     var body: some View {
         VStack(spacing: 12) {
-            Circle()
-                .fill(color.gradient)
-                .frame(width: 60.0, height: 60.0)
-                .overlay {
-                    Text(score)
-                        .font(.system(.title2, design: .rounded, weight: .bold))
-                        .foregroundColor(.white)
-                }
+            Button(action: onTap) {
+                Circle()
+                    .fill(color.gradient)
+                    .frame(width: 60.0, height: 60.0)
+                    .overlay {
+                        Text(score)
+                            .font(.system(.title2, design: .rounded, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+            }
+            .buttonStyle(.plain)
             
             VStack(spacing: 4) {
                 Text(name)

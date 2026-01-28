@@ -30,13 +30,15 @@ struct WatchScoringView: View {
                             ScoreColumn(
                                 team: "Team 1",
                                 score: viewModel.state.isTieBreak ? "\(viewModel.state.team1TieBreakPoints)" : viewModel.state.team1Score.rawValue,
-                                color: .green
+                                color: .green,
+                                onTap: { viewModel.scorePoint(forTeam1: true) }
                             )
                             Divider()
                             ScoreColumn(
                                 team: "Team 2",
                                 score: viewModel.state.isTieBreak ? "\(viewModel.state.team2TieBreakPoints)" : viewModel.state.team2Score.rawValue,
-                                color: .blue
+                                color: .blue,
+                                onTap: { viewModel.scorePoint(forTeam1: false) }
                             )
                         }
                         .padding(.top, 2)
@@ -48,25 +50,20 @@ struct WatchScoringView: View {
                         
                         Spacer()
                         
-                        // Action Buttons
-                        HStack(spacing: 12) {
-                            ScoreButton(color: .green) {
-                                viewModel.scorePoint(forTeam1: true)
-                            }
-                            
-                            Button(action: { viewModel.undoPoint() }) {
+                        // Undo Button (Center Bottom)
+                        Button(action: { viewModel.undoPoint() }) {
+                            VStack(spacing: 2) {
                                 Image(systemName: "arrow.uturn.backward.circle.fill")
                                     .resizable()
                                     .frame(width: 24.0, height: 24.0)
-                                    .foregroundColor(viewModel.canUndo ? .orange : .gray.opacity(0.3))
+                                Text("UNDO")
+                                    .font(.system(size: 8, weight: .bold))
                             }
-                            .buttonStyle(.plain)
-                            .disabled(!viewModel.canUndo)
-                            
-                            ScoreButton(color: .blue) {
-                                viewModel.scorePoint(forTeam1: false)
-                            }
+                            .foregroundColor(viewModel.canUndo ? .orange : .gray.opacity(0.3))
                         }
+                        .buttonStyle(.plain)
+                        .disabled(!viewModel.canUndo)
+                        .padding(.bottom, 5)
                     }
                     .containerBackground(Color.black.gradient, for: .navigation)
                     .tag(0)
@@ -95,35 +92,24 @@ struct ScoreColumn: View {
     let team: String
     let score: String
     let color: Color
+    let onTap: () -> Void
     
     var body: some View {
-        VStack(spacing: 2) {
-            Text(team)
-                .font(.system(.caption2, weight: .medium))
-                .foregroundColor(.secondary)
-            Text(score)
-            .font(.system(.title, design: .rounded, weight: .bold))
-                .foregroundColor(color)
+        Button(action: onTap) {
+            VStack(spacing: 2) {
+                Text(team)
+                    .font(.system(.caption2, weight: .medium))
+                    .foregroundColor(.secondary)
+                Text(score)
+                    .font(.system(.title, design: .rounded, weight: .bold))
+                    .foregroundColor(color)
+            }
         }
+        .buttonStyle(.plain)
         .frame(maxWidth: .infinity)
     }
 }
 
-struct ScoreButton: View {
-    let color: Color
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "plus.circle.fill")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 44.0, height: 44.0)
-                .foregroundStyle(.black, color.gradient)
-        }
-        .buttonStyle(.plain)
-    }
-}
 
 #Preview {
     WatchScoringView()
