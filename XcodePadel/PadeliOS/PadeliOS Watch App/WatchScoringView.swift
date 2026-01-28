@@ -6,18 +6,35 @@ struct WatchScoringView: View {
     
     var body: some View {
         VStack(spacing: 8) {
+            // Sets Header
+            HStack(spacing: 20) {
+                Text("Sets: \(viewModel.state.team1Sets)")
+                Text("-")
+                Text("\(viewModel.state.team2Sets)")
+            }
+            .font(.system(.caption2, weight: .bold))
+            .foregroundColor(.secondary)
+
             // Scores Header
             HStack(spacing: 12) {
-                ScoreColumn(team: "Team 1", score: viewModel.state.team1Score.rawValue, color: .green)
+                ScoreColumn(
+                    team: "Team 1",
+                    score: viewModel.state.isTieBreak ? "\(viewModel.state.team1TieBreakPoints)" : viewModel.state.team1Score.rawValue,
+                    color: .green
+                )
                 Divider()
-                ScoreColumn(team: "Team 2", score: viewModel.state.team2Score.rawValue, color: .blue)
+                ScoreColumn(
+                    team: "Team 2",
+                    score: viewModel.state.isTieBreak ? "\(viewModel.state.team2TieBreakPoints)" : viewModel.state.team2Score.rawValue,
+                    color: .blue
+                )
             }
-            .padding(.top, 4)
+            .padding(.top, 2)
             
             // Sets/Games simple indicator
-            Text("Games: \(viewModel.state.team1Games) - \(viewModel.state.team2Games)")
+            Text(viewModel.state.isTieBreak ? "TIE BREAK" : "Games: \(viewModel.state.team1Games) - \(viewModel.state.team2Games)")
                 .font(.system(.caption2, design: .monospaced))
-                .foregroundColor(.secondary)
+                .foregroundColor(viewModel.state.isTieBreak ? .yellow : .secondary)
             
             Spacer()
             

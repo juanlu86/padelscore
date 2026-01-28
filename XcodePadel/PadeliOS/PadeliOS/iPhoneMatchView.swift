@@ -11,15 +11,32 @@ struct iPhoneMatchView: View {
                     // Match Status Card
                     VStack(spacing: 16) {
                         HStack {
-                            TeamScoreCard(name: "Galán/Lebrón", score: viewModel.state.team1Score.rawValue, games: viewModel.state.team1Games, color: .green)
+                            TeamScoreCard(
+                                name: "Galán/Lebrón",
+                                score: viewModel.state.isTieBreak ? "\(viewModel.state.team1TieBreakPoints)" : viewModel.state.team1Score.rawValue,
+                                games: viewModel.state.team1Games,
+                                sets: viewModel.state.team1Sets,
+                                color: .green
+                            )
                             
                             VStack {
+                                if viewModel.state.isTieBreak {
+                                    Text("TIE-BREAK")
+                                        .font(.system(size: 8, weight: .black))
+                                        .foregroundColor(.yellow)
+                                }
                                 Text("VS")
                                     .font(.system(.headline, design: .default, weight: .black))
                                     .foregroundColor(.secondary.opacity(0.5))
                             }
                             
-                            TeamScoreCard(name: "Coello/Tapia", score: viewModel.state.team2Score.rawValue, games: viewModel.state.team2Games, color: .blue)
+                            TeamScoreCard(
+                                name: "Coello/Tapia",
+                                score: viewModel.state.isTieBreak ? "\(viewModel.state.team2TieBreakPoints)" : viewModel.state.team2Score.rawValue,
+                                games: viewModel.state.team2Games,
+                                sets: viewModel.state.team2Sets,
+                                color: .blue
+                            )
                         }
                     }
                     .padding()
@@ -56,6 +73,7 @@ struct TeamScoreCard: View {
     let name: String
     let score: String
     let games: Int
+    let sets: Int
     let color: Color
     
     var body: some View {
@@ -76,9 +94,13 @@ struct TeamScoreCard: View {
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                 
-                Text("Games: \(games)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
+                HStack {
+                    Text("Sets: \(sets)")
+                    Text("•")
+                    Text("Games: \(games)")
+                }
+                .font(.system(size: 10, design: .monospaced))
+                .foregroundColor(.secondary)
             }
         }
         .frame(maxWidth: .infinity)
