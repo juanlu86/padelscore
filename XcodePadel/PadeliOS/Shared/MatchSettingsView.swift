@@ -42,8 +42,6 @@ struct MatchSettingsView: View {
                     }}
                 ))
                 .coordinateSpace(name: "picker")
-                
-                selectionOverlay
             }
         }
         .frame(maxHeight: .infinity)
@@ -71,14 +69,6 @@ struct MatchSettingsView: View {
                 .scaleEffect(scale)
                 .opacity(opacity)
         }
-    }
-    
-    private var selectionOverlay: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .stroke(Color.yellow.opacity(0.4), lineWidth: 2)
-            .frame(height: 56)
-            .padding(.horizontal, 6)
-            .allowsHitTesting(false)
     }
     
     private var controlsSection: some View {
