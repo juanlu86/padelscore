@@ -4,7 +4,7 @@ process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
 process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
 
 admin.initializeApp({
-    projectId: 'demo-padel', // 'demo-' prefix triggers emulator mode automatically in some SDK versions, but env vars are safer
+    projectId: 'padelscore-watch-1e0d3',
 });
 
 async function main() {

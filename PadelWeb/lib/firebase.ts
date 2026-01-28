@@ -5,7 +5,7 @@ const firebaseConfig = {
     // Config not needed for emulators, but typically:
     apiKey: "demo-key",
     authDomain: "demo-project.firebaseapp.com",
-    projectId: "demo-padel",
+    projectId: "padelscore-watch-1e0d3",
     storageBucket: "demo-project.appspot.com",
     messagingSenderId: "123456789",
     appId: "1:123456789:web:abcdef"
