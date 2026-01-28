@@ -55,8 +55,10 @@ struct iPhoneMatchView: View {
                             }
                             
                             ActionButton(title: "Undo Point", icon: "arrow.uturn.backward", color: .orange) {
-                                // Undo not implemented in logic yet
+                                viewModel.undoPoint()
                             }
+                            .disabled(!viewModel.canUndo)
+                            .opacity(viewModel.canUndo ? 1.0 : 0.5)
                         }
                         .padding(.horizontal)
                     }

@@ -39,10 +39,19 @@ struct WatchScoringView: View {
             Spacer()
             
             // Action Buttons
-            HStack(spacing: 8) {
+            HStack(spacing: 12) {
                 ScoreButton(color: .green) {
                     viewModel.scorePoint(forTeam1: true)
                 }
+                
+                Button(action: { viewModel.undoPoint() }) {
+                    Image(systemName: "arrow.uturn.backward.circle.fill")
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(viewModel.canUndo ? .orange : .gray.opacity(0.3))
+                }
+                .buttonStyle(.plain)
+                .disabled(!viewModel.canUndo)
                 
                 ScoreButton(color: .blue) {
                     viewModel.scorePoint(forTeam1: false)
