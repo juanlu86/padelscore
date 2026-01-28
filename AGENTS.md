@@ -64,7 +64,7 @@ A unified Padel scoring ecosystem. The **Apple Watch** is the primary input, the
 ---
 
 ## 🚀 Initial Boot Sequence
-1. **Task 1**: Scaffold `PadelCore` with initial unit tests. Run the tests.
-2. **Task 2**: If tests pass, initialize Firebase (Standard Hosting) and Cloud Functions.
-3. **Task 3**: Create a "HelloWorld" sync test: Write to Local Firestore and verify the Web app sees it.
-4. **Task 4**: Report a "System Healthy" status once all local emulators and tests are green.
+1. [COMPLETED] **Task 1**: Scaffold `PadelCore` with initial unit tests. Run the tests.
+2. [COMPLETED] **Task 2**: If tests pass, initialize Firebase (Standard Hosting) and Cloud Functions.
+3. [COMPLETED] **Task 3**: Create a "HelloWorld" sync test: Write to Local Firestore and verify the Web app sees it.
+4. [COMPLETED] **Task 4**: Report a "System Healthy" status once all local emulators and tests are green.
