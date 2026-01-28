@@ -1,7 +1,4 @@
-# Xcode
-#
-# gitignore contributors: scrollback, dcurrie, bluebox, akiasame, sebastianreuchsel
-
+# --- Xcode & Apple ---
 ## Build results
 build/
 DerivedData/
@@ -27,8 +24,42 @@ xcuserdata
 .build/
 .swiftpm/
 
-## CocoaPods
-#
-# We recommend against adding the Pods directory to your .gitignore. However
-# you should still check your project settings to see if it's right for you.
-# Pods/
+# --- Firebase & Node.js ---
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+firebase-debug.log*
+firebase-debug.*.log*
+
+# Firebase cache
+.firebase/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+lib-cov
+coverage
+.nyc_output
+
+# Dependencies
+node_modules/
+bower_components
+.npm
+.eslintcache
+
+# Misc
+.node_repl_history
+*.tgz
+.yarn-integrity
+.env
+.dataconnect
+.grunt
+.lock-wscript
+build/Release
