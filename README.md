@@ -20,7 +20,7 @@ PadelScore is designed for competitive players who want a high-visibility, distr
 - `XcodePadel/`: The Apple ecosystem project containing:
   - `PadeliOS`: iPhone companion app.
   - `PadeliOS Watch App`: The primary scoring interface.
-- `PadelWeb/`: React/Vite-based web dashboard.
+- `PadelWeb/`: Next.js-based web dashboard.
 - `functions/`: Firebase Cloud Functions (Node.js/TypeScript).
 - `firebase.json`: Infrastructure configuration.
 
@@ -71,19 +71,16 @@ The backend uses Firebase Emulators for development and standard Firebase servic
 - Node.js
 
 **Steps**:
-1. Navigate to the web directory:
+1. Open your terminal in the **project root**.
+2. Navigate to the web directory and install dependencies:
    ```bash
-   cd PadelWeb
+   cd PadelWeb && npm install
    ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
+3. Start the development server from within the `PadelWeb` folder:
    ```bash
    npm run dev
    ```
-   *The web dashboard will be available at `http://localhost:5173`.*
+   *The web dashboard will be available at `http://localhost:3000`.*
 
 ---
 
