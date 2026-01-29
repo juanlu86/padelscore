@@ -84,6 +84,8 @@ public class SyncService: ObservableObject {
             ]},
             "servingTeam": state.servingTeam,
             "status": state.isMatchOver ? "finished" : "live",
+            "scoringSystem": state.scoringSystem.rawValue,
+            "deuceCount": state.deuceCount,
             "updatedAt": FieldValue.serverTimestamp()
         ]
     }

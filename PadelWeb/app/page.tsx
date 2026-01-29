@@ -84,7 +84,43 @@ export default function Home() {
         </div>
 
         {/* Scoreboard Table */}
-        <div className="p-8 lg:p-12 overflow-x-auto overflow-y-hidden">
+        <div className="p-8 lg:p-12 overflow-x-auto overflow-y-hidden relative">
+
+          {/* Sudden Death Special Point Indicator */}
+          {(() => {
+            const s1 = String(matchData.score?.team1 || '');
+            const s2 = String(matchData.score?.team2 || '');
+            const isDeuce = s1 === '40' && s2 === '40';
+
+            // Normalize scoring system string
+            const sys = String(matchData.scoringSystem || '');
+            const isGoldenPoint = isDeuce && sys === 'Golden Point';
+            const isStarPoint = isDeuce && sys === 'Star Point' && (Number(matchData.deuceCount || 0) >= 3);
+
+            if (!isGoldenPoint && !isStarPoint) return null;
+
+            const label = isGoldenPoint ? 'GOLDEN POINT' : 'STAR POINT';
+            const themeColor = isStarPoint ? 'from-orange-500 to-yellow-500' : 'from-yellow-400 to-yellow-600';
+
+            return (
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-50 animate-float pointer-events-none">
+                <div className="relative group scale-90 md:scale-100">
+                  {/* Outer Glow Aura */}
+                  <div className={`absolute inset-0 rounded-full blur-2xl animate-special-glow ${isStarPoint ? 'bg-orange-500/60' : 'bg-yellow-500/60'}`}></div>
+
+                  {/* Main Badge */}
+                  <div className="relative flex items-center gap-3 px-6 py-2 glass rounded-full border border-white/30 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+                    <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${themeColor} animate-pulse shadow-sm`}></div>
+                    <span className="text-xs font-black tracking-[0.3em] text-white whitespace-nowrap uppercase drop-shadow-sm">
+                      {label}
+                    </span>
+                    <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${themeColor} animate-pulse shadow-sm`}></div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-white/5">
