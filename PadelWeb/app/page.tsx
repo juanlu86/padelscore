@@ -87,9 +87,14 @@ export default function Home() {
               {/* Team 1 Row */}
               <tr className="group">
                 <td className="py-8 px-2 min-w-[120px]">
-                  <span className="text-xl md:text-2xl font-black tracking-tight text-zinc-100 group-hover:text-white transition-colors duration-300 uppercase truncate block">
-                    {matchData.team1 || 'Player 1'}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    {matchData.servingTeam === 1 && (
+                      <div className="w-2.5 h-2.5 bg-padel-yellow rounded-full shadow-[0_0_8px_rgba(250,204,21,0.6)] animate-pulse shrink-0"></div>
+                    )}
+                    <span className={`text-xl md:text-2xl font-black tracking-tight group-hover:text-white transition-colors duration-300 uppercase truncate block ${matchData.servingTeam === 1 ? 'text-white' : 'text-zinc-400'}`}>
+                      {matchData.team1 || 'Player 1'}
+                    </span>
+                  </div>
                 </td>
                 {setsToShow.map((set, i) => (
                   <td key={i} className="text-center px-4">
@@ -108,9 +113,14 @@ export default function Home() {
               {/* Team 2 Row */}
               <tr className="group">
                 <td className="py-8 px-2">
-                  <span className="text-xl md:text-2xl font-black tracking-tight text-zinc-100 group-hover:text-white transition-colors duration-300 uppercase truncate block">
-                    {matchData.team2 || 'Player 2'}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    {matchData.servingTeam === 2 && (
+                      <div className="w-2.5 h-2.5 bg-padel-yellow rounded-full shadow-[0_0_8px_rgba(250,204,21,0.6)] animate-pulse shrink-0"></div>
+                    )}
+                    <span className={`text-xl md:text-2xl font-black tracking-tight group-hover:text-white transition-colors duration-300 uppercase truncate block ${matchData.servingTeam === 2 ? 'text-white' : 'text-zinc-400'}`}>
+                      {matchData.team2 || 'Player 2'}
+                    </span>
+                  </div>
                 </td>
                 {setsToShow.map((set, i) => (
                   <td key={i} className="text-center px-4">

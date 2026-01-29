@@ -47,6 +47,7 @@ public class SyncService {
                 "team1": $0.team1Games,
                 "team2": $0.team2Games
             ]},
+            "servingTeam": state.servingTeam,
             "status": state.isMatchOver ? "finished" : "live",
             "updatedAt": FieldValue.serverTimestamp()
         ]

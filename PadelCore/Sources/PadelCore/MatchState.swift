@@ -46,6 +46,9 @@ public struct MatchState: Codable {
     public var isMatchOver: Bool = false
     public var completedSets: [SetResult] = []
     
+    /// The team currently serving (1 or 2)
+    public var servingTeam: Int = 1
+    
     public init(
         team1Score: Score = .zero,
         team2Score: Score = .zero,
@@ -56,11 +59,12 @@ public struct MatchState: Codable {
         team1TieBreakPoints: Int = 0,
         team2TieBreakPoints: Int = 0,
         scoringSystem: ScoringSystem = .standard,
-        deuceCount: Int = 0,
+        deuceCount: Int = 1,
         useTieBreak: Bool = true,
         isTieBreak: Bool = false,
         isMatchOver: Bool = false,
-        completedSets: [SetResult] = []
+        completedSets: [SetResult] = [],
+        servingTeam: Int = 1
     ) {
         self.team1Score = team1Score
         self.team2Score = team2Score
@@ -76,5 +80,6 @@ public struct MatchState: Codable {
         self.isTieBreak = isTieBreak
         self.isMatchOver = isMatchOver
         self.completedSets = completedSets
+        self.servingTeam = servingTeam
     }
 }

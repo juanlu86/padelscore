@@ -17,6 +17,7 @@ struct iPhoneMatchView: View {
                                     score: viewModel.state.isTieBreak ? "\(viewModel.state.team1TieBreakPoints)" : viewModel.state.team1Score.rawValue,
                                     games: viewModel.state.team1Games,
                                     sets: viewModel.state.team1Sets,
+                                    isServing: viewModel.state.servingTeam == 1,
                                     color: .green,
                                     onTap: { viewModel.scorePoint(forTeam1: true) }
                                 )
@@ -37,6 +38,7 @@ struct iPhoneMatchView: View {
                                     score: viewModel.state.isTieBreak ? "\(viewModel.state.team2TieBreakPoints)" : viewModel.state.team2Score.rawValue,
                                     games: viewModel.state.team2Games,
                                     sets: viewModel.state.team2Sets,
+                                    isServing: viewModel.state.servingTeam == 2,
                                     color: .blue,
                                     onTap: { viewModel.scorePoint(forTeam1: false) }
                                 )
@@ -103,22 +105,48 @@ struct TeamScoreCard: View {
     let score: String
     let games: Int
     let sets: Int
+    let isServing: Bool
     let color: Color
     let onTap: () -> Void
     
     var body: some View {
         VStack(spacing: 12) {
             Button(action: onTap) {
-                Circle()
-                    .fill(color.gradient)
-                    .frame(width: 140.0, height: 140.0)
-                    .overlay {
-                        Text(score)
-                            .font(.system(size: 64, weight: .black, design: .rounded))
-                            .foregroundColor(.white)
+                ZStack(alignment: .topTrailing) {
+                    Circle()
+                        .fill(color.gradient)
+                        .frame(width: 140.0, height: 140.0)
+                        .overlay {
+                            if score == "AD" {
+                                Text(score)
+                                    .font(.system(size: 48, weight: .black, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .minimumScaleFactor(0.5)
+                                    .lineLimit(1)
+                            } else {
+                                Text(score)
+                                    .font(.system(size: 64, weight: .black, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .minimumScaleFactor(0.4)
+                                    .lineLimit(1)
+                            }
+                        }
+                    
+                    if isServing {
+                        Circle()
+                            .fill(Color.yellow)
+                            .frame(width: 32, height: 32)
+                            .overlay(
+                                Circle().stroke(Color.black, lineWidth: 3)
+                            )
+                            .shadow(radius: 4)
+                            .offset(x: -4, y: 4)
+                            .transition(.scale.combined(with: .opacity))
                     }
+                }
             }
             .buttonStyle(.plain)
+            .animation(.spring(), value: isServing)
             
             VStack(spacing: 4) {
                 Text(name)

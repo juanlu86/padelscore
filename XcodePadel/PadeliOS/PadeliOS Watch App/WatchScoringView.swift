@@ -30,6 +30,7 @@ struct WatchScoringView: View {
                             ScoreColumn(
                                 team: "Team 1",
                                 score: viewModel.state.isTieBreak ? "\(viewModel.state.team1TieBreakPoints)" : viewModel.state.team1Score.rawValue,
+                                isServing: viewModel.state.servingTeam == 1,
                                 color: .green,
                                 onTap: { viewModel.scorePoint(forTeam1: true) }
                             )
@@ -37,6 +38,7 @@ struct WatchScoringView: View {
                             ScoreColumn(
                                 team: "Team 2",
                                 score: viewModel.state.isTieBreak ? "\(viewModel.state.team2TieBreakPoints)" : viewModel.state.team2Score.rawValue,
+                                isServing: viewModel.state.servingTeam == 2,
                                 color: .blue,
                                 onTap: { viewModel.scorePoint(forTeam1: false) }
                             )
@@ -91,24 +93,48 @@ struct WatchScoringView: View {
 struct ScoreColumn: View {
     let team: String
     let score: String
+    let isServing: Bool
     let color: Color
     let onTap: () -> Void
     
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: 0) {
-                Text(team.prefix(6)) // Abbreviate to T1/T2 style if needed
-                    .font(.system(size: 7, weight: .black))
-                    .foregroundColor(.secondary.opacity(0.8))
-                Text(score)
-                    .font(.system(size: 180, weight: .black, design: .rounded))
-                    .foregroundColor(color)
-                    .scaleEffect(x: 0.85, y: 1.15) // Even more aggressive "tall" look
-                    .minimumScaleFactor(0.4)
+                HStack(spacing: 2) {
+                    if isServing {
+                        Circle()
+                            .fill(Color.yellow)
+                            .frame(width: 4, height: 4)
+                    }
+                    Text(team.prefix(6))
+                        .font(.system(size: 7, weight: .black))
+                        .foregroundColor(isServing ? .yellow : .secondary.opacity(0.8))
+                    if isServing {
+                        Circle()
+                            .fill(Color.yellow)
+                            .frame(width: 4, height: 4)
+                    }
+                }
+                
+                if score == "AD" {
+                    Text(score)
+                        .font(.system(size: 130, weight: .black, design: .rounded))
+                        .foregroundColor(color)
+                        .minimumScaleFactor(0.4)
+                        .lineLimit(1)
+                } else {
+                    Text(score)
+                        .font(.system(size: 180, weight: .black, design: .rounded))
+                        .foregroundColor(color)
+                        .scaleEffect(x: 0.85, y: 1.15)
+                        .minimumScaleFactor(0.4)
+                        .lineLimit(1)
+                }
             }
         }
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity)
+        .animation(.spring(), value: isServing)
     }
 }
 

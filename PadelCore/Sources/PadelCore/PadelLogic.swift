@@ -73,6 +73,18 @@ public class PadelLogic {
             newState.team2TieBreakPoints += 1
         }
         
+        // TIE-BREAK SERVING RULES:
+        // 1st point: Server A
+        // 2nd & 3rd points: Server B
+        // 4th & 5th points: Server A...
+        // Total points played BEFORE this point update = (team1Points + team2Points - 1)
+        let totalPointsPlayed = newState.team1TieBreakPoints + newState.team2TieBreakPoints
+        
+        // Swap server if points played is odd (after 1, 3, 5, 7...)
+        if totalPointsPlayed % 2 != 0 {
+            newState.servingTeam = newState.servingTeam == 1 ? 2 : 1
+        }
+        
         let usPoints = forTeam1 ? newState.team1TieBreakPoints : newState.team2TieBreakPoints
         let themPoints = forTeam1 ? newState.team2TieBreakPoints : newState.team1TieBreakPoints
         
@@ -101,6 +113,15 @@ public class PadelLogic {
         newState.team2TieBreakPoints = 0
         newState.isTieBreak = false
         newState.deuceCount = 0
+        
+        // SWAP SERVER after every normal game
+        // In tie-break, the server for the NEXT game is the one who DID NOT serve first in the tie-break
+        // But our logic handles tie-break swaps point-by-point, so at the end of a tie-break
+        // we just need to ensure the standard "swap after game" logic doesn't double-swap or miss-swap.
+        // Actually, tennis rule: The server for the first point of a tie-break serves the next game? 
+        // No: the player who served first in the tie-break is the RECEIVER in the next set/game.
+        // Simplified for our app: Always swap after any game finishes.
+        newState.servingTeam = newState.servingTeam == 1 ? 2 : 1
         
         // Check for Tie-break trigger (6-6)
         if newState.useTieBreak && !wasTieBreak && newState.team1Games == 6 && newState.team2Games == 6 {

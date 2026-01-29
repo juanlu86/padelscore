@@ -75,29 +75,78 @@ struct MatchSettingsView: View {
         VStack(spacing: 6) {
             Divider().background(Color.white.opacity(0.1))
             
+            // Serving Team Selection
+            HStack {
+                Text(platformLabel("WHO SERVES?"))
+                    .font(.system(size: platformValue(watch: 9, ios: 11), weight: .bold, design: .rounded))
+                    .foregroundColor(.white.opacity(0.7))
+                
+                Spacer()
+                
+                HStack(spacing: 0) {
+                    Button(action: { viewModel.state.servingTeam = 1 }) {
+                        Text(platformValue(watch: "T1", ios: "TEAM 1"))
+                            .font(.system(size: platformValue(watch: 9, ios: 10), weight: .black))
+                            .padding(.horizontal, platformValue(watch: 8, ios: 10))
+                            .padding(.vertical, platformValue(watch: 4, ios: 6))
+                            .background(viewModel.state.servingTeam == 1 ? Color.yellow : Color.white.opacity(0.05))
+                            .foregroundColor(viewModel.state.servingTeam == 1 ? .black : .white)
+                    }
+                    
+                    Button(action: { viewModel.state.servingTeam = 2 }) {
+                        Text(platformValue(watch: "T2", ios: "TEAM 2"))
+                            .font(.system(size: platformValue(watch: 9, ios: 10), weight: .black))
+                            .padding(.horizontal, platformValue(watch: 8, ios: 10))
+                            .padding(.vertical, platformValue(watch: 4, ios: 6))
+                            .background(viewModel.state.servingTeam == 2 ? Color.yellow : Color.white.opacity(0.05))
+                            .foregroundColor(viewModel.state.servingTeam == 2 ? .black : .white)
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.1), lineWidth: 1))
+            }
+            .padding(.horizontal, platformValue(watch: 4, ios: 12))
+            .padding(.vertical, platformValue(watch: 2, ios: 4))
+            
             Toggle(isOn: $viewModel.state.useTieBreak) {
                 Text("TIE-BREAK")
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .font(.system(size: platformValue(watch: 9, ios: 11), weight: .bold, design: .rounded))
                     .foregroundColor(.white.opacity(0.7))
             }
             .tint(.yellow)
-            .scaleEffect(0.85)
-            .padding(.horizontal, 12)
+            .scaleEffect(platformValue(watch: 0.75, ios: 0.85))
+            .padding(.horizontal, platformValue(watch: 4, ios: 12))
             
             Button(action: onStart) {
-                Text("START MATCH")
-                    .font(.system(size: 14, weight: .black, design: .rounded))
+                Text("START")
+                    .font(.system(size: platformValue(watch: 12, ios: 14), weight: .black, design: .rounded))
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, platformValue(watch: 6, ios: 8))
                     .background(Color.yellow.gradient)
                     .cornerRadius(10)
             }
             .buttonStyle(.plain)
-            .padding(.horizontal, 8)
-            .padding(.bottom, 6)
+            .padding(.horizontal, platformValue(watch: 4, ios: 8))
+            .padding(.bottom, platformValue(watch: 2, ios: 6))
         }
         .background(Color.black)
+    }
+
+    private func platformValue<T>(watch: T, ios: T) -> T {
+        #if os(watchOS)
+        return watch
+        #else
+        return ios
+        #endif
+    }
+
+    private func platformLabel(_ text: String) -> String {
+        #if os(watchOS)
+        return text.replacingOccurrences(of: "WHO SERVES?", with: "SERVES:")
+        #else
+        return text
+        #endif
     }
     
     private func systemDescription(for system: ScoringSystem) -> String {
