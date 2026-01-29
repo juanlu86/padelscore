@@ -44,8 +44,8 @@ export default function Home() {
   const isMatchOver = matchData.status === 'finished' || matchData.isMatchOver === true;
 
   // Who won?
-  const team1SetsWon = completedSets.filter((s: any) => s.team1 > s.team2).length;
-  const team2SetsWon = completedSets.filter((s: any) => s.team2 > s.team1).length;
+  const team1SetsWon = matchData.sets?.team1 ?? 0;
+  const team2SetsWon = matchData.sets?.team2 ?? 0;
   const team1Won = isMatchOver && team1SetsWon > team2SetsWon;
   const team2Won = isMatchOver && team2SetsWon > team1SetsWon;
 
