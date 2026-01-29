@@ -124,6 +124,11 @@ public class MatchViewModel {
     public func resetMatch() {
         history.removeAll()
         var newState = MatchState()
+        // Preserve settings
+        newState.scoringSystem = state.scoringSystem
+        newState.useTieBreak = state.useTieBreak
+        newState.isGrandSlam = state.isGrandSlam
+        
         newState.version = state.version + 1
         state = newState
         isMatchStarted = false
