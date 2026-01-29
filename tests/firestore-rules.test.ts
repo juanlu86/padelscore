@@ -76,4 +76,33 @@ describe("Firestore Security Rules", () => {
             })
         );
     });
+
+    it("should deny version rollbacks", async () => {
+        const authedDb = testEnv.authenticatedContext("alice").firestore();
+        const matchRef = authedDb.collection("matches").doc("version-test");
+
+        // Initial setup
+        await testEnv.withSecurityRulesDisabled(async (context) => {
+            await context.firestore().collection("matches").doc("version-test").set({
+                team1: "A",
+                team2: "B",
+                status: "live",
+                version: 10
+            });
+        });
+
+        // Try to rollback to version 9
+        await assertFails(
+            matchRef.update({
+                version: 9
+            })
+        );
+
+        // Try to update to version 11 (should succeed)
+        await assertSucceeds(
+            matchRef.update({
+                version: 11
+            })
+        );
+    });
 });

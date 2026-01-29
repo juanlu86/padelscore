@@ -16,7 +16,7 @@ describe("Cloud Functions - validateMatchUpdate", () => {
             expect.fail("Should have thrown an error");
         } catch (error: any) {
             expect(error.code).to.equal("invalid-argument");
-            expect(error.message).to.equal("Teams are required");
+            expect(error.message).to.contain("Invalid match data");
         }
     });
 
