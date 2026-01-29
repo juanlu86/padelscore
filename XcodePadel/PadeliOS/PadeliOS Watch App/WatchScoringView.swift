@@ -116,20 +116,23 @@ struct ScoreColumn: View {
                     }
                 }
                 
-                if score == "AD" {
-                    Text(score)
-                        .font(.system(size: 130, weight: .black, design: .rounded))
-                        .foregroundColor(color)
-                        .minimumScaleFactor(0.4)
-                        .lineLimit(1)
-                } else {
-                    Text(score)
-                        .font(.system(size: 180, weight: .black, design: .rounded))
-                        .foregroundColor(color)
-                        .scaleEffect(x: 0.85, y: 1.15)
-                        .minimumScaleFactor(0.4)
-                        .lineLimit(1)
+                ZStack {
+                    if score == "AD" {
+                        Text(score)
+                            .font(.system(size: 130, weight: .black, design: .rounded))
+                            .foregroundColor(color)
+                            .minimumScaleFactor(0.4)
+                            .lineLimit(1)
+                    } else {
+                        Text(score)
+                            .font(.system(size: 180, weight: .black, design: .rounded))
+                            .foregroundColor(color)
+                            .scaleEffect(x: 0.85, y: 1.15)
+                            .minimumScaleFactor(0.4)
+                            .lineLimit(1)
+                    }
                 }
+                .frame(height: 120) // Anchor the height to prevent shifts
             }
         }
         .buttonStyle(.plain)
