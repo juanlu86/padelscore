@@ -34,7 +34,8 @@ describe('Home Component', () => {
             score: { team1: '30', team2: '15' },
             games: { team1: 2, team2: 1 },
             status: 'live',
-            completedSets: []
+            completedSets: [],
+            sets: { team1: 0, team2: 0 }
         };
 
         // Cast to any to access mock implementation
@@ -62,7 +63,8 @@ describe('Home Component', () => {
             completedSets: [
                 { team1: 6, team2: 0 },
                 { team1: 6, team2: 0 }
-            ]
+            ],
+            sets: { team1: 2, team2: 0 }
         };
 
         (onSnapshot as any).mockImplementation((_docRef: any, callback: any) => {
