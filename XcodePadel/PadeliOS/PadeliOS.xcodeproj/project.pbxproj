@@ -26,6 +26,8 @@
 		95FB7BF32F2AD0F900B7DC55 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 95FB7BF22F2AD0F900B7DC55 /* FirebaseFirestore */; };
 		95FB7BF92F2AD3ED00B7DC55 /* ConnectivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7BF82F2AD3ED00B7DC55 /* ConnectivityService.swift */; };
 		95FB7BFA2F2AD3ED00B7DC55 /* ConnectivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7BF82F2AD3ED00B7DC55 /* ConnectivityService.swift */; };
+		95FB7C012F2B4D0000B7DC55 /* WorkoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C002F2B4D0000B7DC55 /* WorkoutManager.swift */; };
+		95FB7C022F2B4D0000B7DC55 /* WorkoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C002F2B4D0000B7DC55 /* WorkoutManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +94,7 @@
 		95FB7BE72F2A6DDE00B7DC55 /* MatchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchSettingsView.swift; sourceTree = "<group>"; };
 		95FB7BEC2F2ACFDE00B7DC55 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
 		95FB7BF82F2AD3ED00B7DC55 /* ConnectivityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivityService.swift; sourceTree = "<group>"; };
+		95FB7C002F2B4D0000B7DC55 /* WorkoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -224,6 +227,7 @@
 				95FB7BE72F2A6DDE00B7DC55 /* MatchSettingsView.swift */,
 				95FB7BE42F2A69E000B7DC55 /* MatchSummaryView.swift */,
 				95FB7BDE2F2A615D00B7DC55 /* MatchViewModel.swift */,
+				95FB7C002F2B4D0000B7DC55 /* WorkoutManager.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -494,6 +498,7 @@
 				95FB7BEE2F2ACFDE00B7DC55 /* SyncService.swift in Sources */,
 				95FB7BE92F2A6DDE00B7DC55 /* MatchSettingsView.swift in Sources */,
 				95FB7BE52F2A69E000B7DC55 /* MatchSummaryView.swift in Sources */,
+				95FB7C012F2B4D0000B7DC55 /* WorkoutManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -520,6 +525,7 @@
 				95FB7BFA2F2AD3ED00B7DC55 /* ConnectivityService.swift in Sources */,
 				95FB7BE62F2A69E000B7DC55 /* MatchSummaryView.swift in Sources */,
 				95FB7BE02F2A615D00B7DC55 /* MatchViewModel.swift in Sources */,
+				95FB7C022F2B4D0000B7DC55 /* WorkoutManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -687,11 +693,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "PadeliOS Watch App/PadeliOS_Watch_App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PadeliOS;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Track your Padel matches to see calories burned and heart rate in the Fitness app.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Save your Padel matches as workouts to track your fitness goals.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.mekachis.PadeliOS;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -724,6 +733,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PadeliOS;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Track your Padel matches to see calories burned and heart rate in the Fitness app.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Save your Padel matches as workouts to track your fitness goals.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.mekachis.PadeliOS;
 				LD_RUNPATH_SEARCH_PATHS = (

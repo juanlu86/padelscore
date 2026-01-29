@@ -14,6 +14,9 @@ public class MatchViewModel {
     private let logic = PadelLogic()
     private var history: [MatchState] = []
     private var cancellables = Set<AnyCancellable>()
+    #if os(watchOS)
+    private let workoutManager = WorkoutManager()
+    #endif
     
     public init(state: MatchState = MatchState()) {
         self.state = state
@@ -68,6 +71,9 @@ public class MatchViewModel {
         state.version += 1
         #if !os(watchOS)
         SyncService.shared.syncMatch(state: state)
+        #else
+        workoutManager.requestAuthorization()
+        workoutManager.startWorkout()
         #endif
         ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
     }
@@ -109,6 +115,8 @@ public class MatchViewModel {
         state.version += 1
         #if !os(watchOS)
         SyncService.shared.syncMatch(state: state)
+        #else
+        workoutManager.endWorkout()
         #endif
         ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
     }
@@ -121,6 +129,8 @@ public class MatchViewModel {
         isMatchStarted = false
         #if !os(watchOS)
         SyncService.shared.syncMatch(state: state)
+        #else
+        workoutManager.endWorkout()
         #endif
         ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
     }
