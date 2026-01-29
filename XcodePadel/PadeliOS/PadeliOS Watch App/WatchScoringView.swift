@@ -64,16 +64,13 @@ struct WatchScoringView: View {
                             .padding(.bottom, 2) // Extra nudge up
                         
                         Button(action: { viewModel.undoPoint() }) {
-                            HStack {
-                                Image(systemName: "arrow.uturn.backward")
-                                Text("UNDO")
-                                    .font(.system(size: 10, weight: .black))
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 28)
-                            .background(viewModel.canUndo ? Color.orange.opacity(0.2) : Color.white.opacity(0.05))
-                            .cornerRadius(14)
-                            .foregroundColor(viewModel.canUndo ? .orange : .secondary.opacity(0.3))
+                            Image(systemName: "arrow.uturn.backward")
+                                .font(.system(size: 12, weight: .black))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 28)
+                                .background(viewModel.canUndo ? Color.orange.opacity(0.2) : Color.white.opacity(0.05))
+                                .cornerRadius(14)
+                                .foregroundColor(viewModel.canUndo ? .orange : .secondary.opacity(0.3))
                         }
                         .buttonStyle(.plain)
                         .disabled(!viewModel.canUndo)
