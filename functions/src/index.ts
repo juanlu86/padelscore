@@ -24,9 +24,31 @@ import { setGlobalOptions } from "firebase-functions";
 // functions should each use functions.runWith({ maxInstances: 10 }) instead.
 // In the v1 API, each function can only serve one request per container, so
 // this will be the maximum concurrent request count.
+import { onCall, HttpsError } from "firebase-functions/v2/https";
+import * as logger from "firebase-functions/logger";
+
 setGlobalOptions({ maxInstances: 10 });
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+/**
+ * Validates match data for scoring consistency.
+ */
+export const validateMatchUpdate = onCall((request) => {
+    const data = request.data;
+    logger.info("Validating match update", { data });
+
+    if (!data.team1 || !data.team2) {
+        throw new HttpsError("invalid-argument", "Teams are required");
+    }
+
+    // Basic consistency check: 
+    // If team1 has 3 sets, match must be over.
+    const completedSets = data.completedSets || [];
+    const team1Sets = completedSets.filter((s: any) => s.team1 > s.team2).length;
+    const team2Sets = completedSets.filter((s: any) => s.team2 > s.team1).length;
+
+    if ((team1Sets >= 2 || team2Sets >= 2) && data.status !== "finished") {
+        return { valid: false, reason: "Match should be finished" };
+    }
+
+    return { valid: true };
+});
