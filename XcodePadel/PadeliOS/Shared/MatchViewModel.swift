@@ -1,5 +1,6 @@
 import SwiftUI
 import Observation
+import Combine
 import PadelCore
 
 @Observable
@@ -9,13 +10,39 @@ public class MatchViewModel {
     
     private let logic = PadelLogic()
     private var history: [MatchState] = []
+    private var cancellables = Set<AnyCancellable>()
     
     public init(state: MatchState = MatchState()) {
         self.state = state
+        
+        // Listen for updates from the other device
+        Publishers.CombineLatest(
+            ConnectivityService.shared.$receivedState,
+            ConnectivityService.shared.$receivedIsStarted
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] state, isStarted in
+            if let state = state, let isStarted = isStarted {
+                self?.handleRemoteStateUpdate(state, isStarted: isStarted)
+            }
+        }
+        .store(in: &cancellables)
+    }
+    
+    private func handleRemoteStateUpdate(_ newState: MatchState, isStarted: Bool) {
+        print("📥 Received remote state update. Started: \(isStarted), Match over: \(newState.isMatchOver)")
+        withAnimation(.spring()) {
+            self.state = newState
+            self.isMatchStarted = isStarted
+        }
     }
     
     public func startMatch() {
         isMatchStarted = true
+        #if !os(watchOS)
+        SyncService.shared.syncMatch(state: state)
+        #endif
+        ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
     }
     
     public func scorePoint(forTeam1: Bool) {
@@ -24,11 +51,19 @@ public class MatchViewModel {
         // Save current state to history before updating
         history.append(state)
         state = logic.scorePoint(forTeam1: forTeam1, currentState: state)
+        #if !os(watchOS)
+        SyncService.shared.syncMatch(state: state)
+        #endif
+        ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
     }
     
     public func undoPoint() {
         guard !history.isEmpty else { return }
         state = history.removeLast()
+        #if !os(watchOS)
+        SyncService.shared.syncMatch(state: state)
+        #endif
+        ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
     }
     
     public func finishMatch() {
@@ -41,12 +76,20 @@ public class MatchViewModel {
         }
         
         state.isMatchOver = true
+        #if !os(watchOS)
+        SyncService.shared.syncMatch(state: state)
+        #endif
+        ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
     }
     
     public func resetMatch() {
         history.removeAll()
         state = MatchState()
         isMatchStarted = false
+        #if !os(watchOS)
+        SyncService.shared.syncMatch(state: state)
+        #endif
+        ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
     }
     
     public var canUndo: Bool {

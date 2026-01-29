@@ -20,6 +20,12 @@
 		95FB7BE62F2A69E000B7DC55 /* MatchSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7BE42F2A69E000B7DC55 /* MatchSummaryView.swift */; };
 		95FB7BE82F2A6DDE00B7DC55 /* MatchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7BE72F2A6DDE00B7DC55 /* MatchSettingsView.swift */; };
 		95FB7BE92F2A6DDE00B7DC55 /* MatchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7BE72F2A6DDE00B7DC55 /* MatchSettingsView.swift */; };
+		95FB7BED2F2ACFDE00B7DC55 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7BEC2F2ACFDE00B7DC55 /* SyncService.swift */; };
+		95FB7BEE2F2ACFDE00B7DC55 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7BEC2F2ACFDE00B7DC55 /* SyncService.swift */; };
+		95FB7BF12F2AD0F900B7DC55 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 95FB7BF02F2AD0F900B7DC55 /* FirebaseCore */; };
+		95FB7BF32F2AD0F900B7DC55 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 95FB7BF22F2AD0F900B7DC55 /* FirebaseFirestore */; };
+		95FB7BF92F2AD3ED00B7DC55 /* ConnectivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7BF82F2AD3ED00B7DC55 /* ConnectivityService.swift */; };
+		95FB7BFA2F2AD3ED00B7DC55 /* ConnectivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7BF82F2AD3ED00B7DC55 /* ConnectivityService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +90,8 @@
 		95FB7BDE2F2A615D00B7DC55 /* MatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewModel.swift; sourceTree = "<group>"; };
 		95FB7BE42F2A69E000B7DC55 /* MatchSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchSummaryView.swift; sourceTree = "<group>"; };
 		95FB7BE72F2A6DDE00B7DC55 /* MatchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchSettingsView.swift; sourceTree = "<group>"; };
+		95FB7BEC2F2ACFDE00B7DC55 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
+		95FB7BF82F2AD3ED00B7DC55 /* ConnectivityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivityService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -124,7 +132,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				95FB7BF12F2AD0F900B7DC55 /* FirebaseCore in Frameworks */,
 				95FB7BD32F2A5E5000B7DC55 /* PadelCore in Frameworks */,
+				95FB7BF32F2AD0F900B7DC55 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,6 +219,8 @@
 		95FB7BDF2F2A615D00B7DC55 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				95FB7BF82F2AD3ED00B7DC55 /* ConnectivityService.swift */,
+				95FB7BEC2F2ACFDE00B7DC55 /* SyncService.swift */,
 				95FB7BE72F2A6DDE00B7DC55 /* MatchSettingsView.swift */,
 				95FB7BE42F2A69E000B7DC55 /* MatchSummaryView.swift */,
 				95FB7BDE2F2A615D00B7DC55 /* MatchViewModel.swift */,
@@ -239,6 +251,8 @@
 			name = PadeliOS;
 			packageProductDependencies = (
 				95FB7BD22F2A5E5000B7DC55 /* PadelCore */,
+				95FB7BF02F2AD0F900B7DC55 /* FirebaseCore */,
+				95FB7BF22F2AD0F900B7DC55 /* FirebaseFirestore */,
 			);
 			productName = PadeliOS;
 			productReference = 95FB7B6B2F2A5A4C00B7DC55 /* PadeliOS.app */;
@@ -408,6 +422,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				95FB7BC42F2A5A8900B7DC55 /* XCLocalSwiftPackageReference "../../PadelCore" */,
+				95FB7BEF2F2AD0F900B7DC55 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 95FB7B6C2F2A5A4C00B7DC55 /* Products */;
@@ -475,6 +490,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				95FB7BE12F2A615D00B7DC55 /* MatchViewModel.swift in Sources */,
+				95FB7BF92F2AD3ED00B7DC55 /* ConnectivityService.swift in Sources */,
+				95FB7BEE2F2ACFDE00B7DC55 /* SyncService.swift in Sources */,
 				95FB7BE92F2A6DDE00B7DC55 /* MatchSettingsView.swift in Sources */,
 				95FB7BE52F2A69E000B7DC55 /* MatchSummaryView.swift in Sources */,
 			);
@@ -498,7 +515,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				95FB7BED2F2ACFDE00B7DC55 /* SyncService.swift in Sources */,
 				95FB7BE82F2A6DDE00B7DC55 /* MatchSettingsView.swift in Sources */,
+				95FB7BFA2F2AD3ED00B7DC55 /* ConnectivityService.swift in Sources */,
 				95FB7BE62F2A69E000B7DC55 /* MatchSummaryView.swift in Sources */,
 				95FB7BE02F2A615D00B7DC55 /* MatchViewModel.swift in Sources */,
 			);
@@ -1048,6 +1067,17 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		95FB7BEF2F2AD0F900B7DC55 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		95FB7BD22F2A5E5000B7DC55 /* PadelCore */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -1078,6 +1108,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 95FB7BC42F2A5A8900B7DC55 /* XCLocalSwiftPackageReference "../../PadelCore" */;
 			productName = PadelCore;
+		};
+		95FB7BF02F2AD0F900B7DC55 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 95FB7BEF2F2AD0F900B7DC55 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		95FB7BF22F2AD0F900B7DC55 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 95FB7BEF2F2AD0F900B7DC55 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
