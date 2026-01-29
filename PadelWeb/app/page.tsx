@@ -19,34 +19,128 @@ export default function Home() {
     return () => unsub();
   }, []);
 
-  if (!matchData) return <div className="p-10">Loading Padel Match...</div>;
+  if (!matchData) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-6 bg-background text-foreground font-sans">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-padel-yellow border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-zinc-500 animate-pulse font-medium tracking-wide">WAITING FOR COURT DATA...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const completedSets = matchData.completedSets || [];
+
+  // Always include the current set (games in progress)
+  const setsToShow = [
+    ...completedSets,
+    {
+      team1: matchData.games?.team1 ?? 0,
+      team2: matchData.games?.team2 ?? 0,
+      isCurrent: true
+    }
+  ];
+
+  // Helper to safely get point score
+  const getPointScore = (team: 'team1' | 'team2') => {
+    const s = matchData.score?.[team];
+    if (s === undefined || s === null) return '0';
+    return String(s);
+  };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-10 font-sans">
-      <div className="bg-white dark:bg-zinc-900 border dark:border-zinc-800 shadow-xl rounded-xl p-8 max-w-md w-full">
-        <h1 className="text-2xl font-bold mb-6 text-center">PadelScore Live</h1>
+    <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-8 bg-background text-foreground font-sans selection:bg-padel-yellow/30">
 
-        <div className="flex justify-between items-center bg-gray-50 dark:bg-zinc-800 p-4 rounded-lg">
-          <div className="flex flex-col items-center">
-            <span className="text-sm text-gray-500 mb-1">Team 1</span>
-            <span className="font-semibold text-lg">{matchData.team1}</span>
-            <span className="text-4xl font-bold text-blue-600 mt-2">{matchData.score?.team1 || '0'}</span>
+      {/* Container with Glassmorphism */}
+      <div className="w-full max-w-3xl glass rounded-3xl overflow-hidden glow-yellow border border-white/5 shadow-2xl">
+
+        {/* Header Section */}
+        <div className="bg-white/5 border-b border-white/5 p-6 flex justify-between items-center">
+          <div className="flex flex-col">
+            <h1 className="text-sm font-black tracking-widest text-zinc-400 uppercase">PadelScore Pro</h1>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`w-2 h-2 rounded-full ${matchData.status === 'live' ? 'bg-padel-yellow pulse' : 'bg-zinc-600'}`}></span>
+              <p className="text-xs font-bold tracking-tight text-zinc-500">
+                {matchData.status === 'live' ? 'LIVE FROM THE COURT' : 'MATCH FINISHED'}
+              </p>
+            </div>
           </div>
-
-          <div className="h-12 w-px bg-gray-300 mx-4"></div>
-
-          <div className="flex flex-col items-center">
-            <span className="text-sm text-gray-500 mb-1">Team 2</span>
-            <span className="font-semibold text-lg">{matchData.team2}</span>
-            <span className="text-4xl font-bold text-red-600 mt-2">{matchData.score?.team2 || '0'}</span>
+          <div className="bg-padel-dark px-4 py-2 rounded-xl border border-white/5">
+            <span className="text-[10px] font-black text-padel-yellow uppercase tracking-widest">Court 1</span>
           </div>
         </div>
 
-        <div className="mt-6 text-center">
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${matchData.status === 'live' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-            {matchData.status?.toUpperCase()}
-          </span>
+        {/* Scoreboard Table */}
+        <div className="p-8 lg:p-12 overflow-x-auto overflow-y-hidden">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-white/5">
+                <th className="text-left pb-4 text-[10px] font-black text-zinc-500 uppercase tracking-widest px-2">Teams</th>
+                {setsToShow.map((_, i) => (
+                  <th key={i} className="pb-4 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-center px-4">Set {i + 1}</th>
+                ))}
+                <th className="pb-4 text-[10px] font-black text-padel-yellow uppercase tracking-widest text-right px-4">Score</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {/* Team 1 Row */}
+              <tr className="group">
+                <td className="py-8 px-2 min-w-[120px]">
+                  <span className="text-xl md:text-2xl font-black tracking-tight text-zinc-100 group-hover:text-white transition-colors duration-300 uppercase truncate block">
+                    {matchData.team1 || 'Player 1'}
+                  </span>
+                </td>
+                {setsToShow.map((set, i) => (
+                  <td key={i} className="text-center px-4">
+                    <span className={`text-2xl md:text-3xl font-black ${set.isCurrent ? 'text-zinc-100' : 'text-zinc-500'} italic transition-colors`}>
+                      {set.team1}
+                    </span>
+                  </td>
+                ))}
+                <td className="text-right px-4 py-8">
+                  <div className="bg-padel-yellow inline-flex items-center justify-center min-w-[64px] h-12 rounded-xl shadow-[0_0_20px_rgba(250,204,21,0.3)] transition-transform hover:scale-105 duration-300">
+                    <span className="font-black text-2xl text-black tabular-nums">{getPointScore('team1')}</span>
+                  </div>
+                </td>
+              </tr>
+
+              {/* Team 2 Row */}
+              <tr className="group">
+                <td className="py-8 px-2">
+                  <span className="text-xl md:text-2xl font-black tracking-tight text-zinc-100 group-hover:text-white transition-colors duration-300 uppercase truncate block">
+                    {matchData.team2 || 'Player 2'}
+                  </span>
+                </td>
+                {setsToShow.map((set, i) => (
+                  <td key={i} className="text-center px-4">
+                    <span className={`text-2xl md:text-3xl font-black ${set.isCurrent ? 'text-zinc-100' : 'text-zinc-500'} italic transition-colors`}>
+                      {set.team2}
+                    </span>
+                  </td>
+                ))}
+                <td className="text-right px-4 py-8">
+                  <div className="bg-padel-yellow inline-flex items-center justify-center min-w-[64px] h-12 rounded-xl shadow-[0_0_20px_rgba(250,204,21,0.3)] transition-transform hover:scale-105 duration-300">
+                    <span className="font-black text-2xl text-black tabular-nums">{getPointScore('team2')}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
+        {/* Footer Info */}
+        <div className="bg-white/2 p-6 border-t border-white/5">
+          <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 tracking-widest uppercase">
+            <span>Powered by Antigravity PadelScore</span>
+            <span>Ref: {matchData.updatedAt?.seconds || '—'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Decorative Elements */}
+      <div className="mt-12 opacity-20 hidden md:block">
+        <p className="text-[12rem] font-black text-white/5 italic select-none pointer-events-none -mt-24">PADEL</p>
       </div>
     </div>
   );

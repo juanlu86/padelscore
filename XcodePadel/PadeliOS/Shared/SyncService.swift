@@ -43,6 +43,10 @@ public class SyncService {
                 "team1": state.team1Sets,
                 "team2": state.team2Sets
             ],
+            "completedSets": state.completedSets.map { [
+                "team1": $0.team1Games,
+                "team2": $0.team2Games
+            ]},
             "status": state.isMatchOver ? "finished" : "live",
             "updatedAt": FieldValue.serverTimestamp()
         ]
