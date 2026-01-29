@@ -27,6 +27,12 @@ struct iPhoneMatchView: View {
                         .padding(.horizontal)
                         .padding(.top, 8)
                     
+                    if let label = viewModel.specialPointLabel {
+                        SpecialPointIndicator(label: label)
+                            .padding(.bottom, 16)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                    
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 32) {
                             // Primary Score Board
@@ -136,12 +142,6 @@ struct iPhoneMatchView: View {
                 onUndo: { viewModel.undoPoint() },
                 onDismiss: { viewModel.resetMatch() }
             )
-        }
-        .overlay(alignment: .top) {
-            if let label = viewModel.specialPointLabel {
-                SpecialPointIndicator(label: label)
-                    .padding(.top, 140)
-            }
         }
     }
     
