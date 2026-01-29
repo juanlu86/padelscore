@@ -21,37 +21,39 @@ struct MatchSettingsView: View {
                 }
                 .tag(0)
                 
-                // Page 2: Serving & Ruels
-                VStack(spacing: 4) {
+                // Page 2: Serving & Rules
+                VStack(spacing: 12) { // Increased spacing to avoid "touching"
                     servingSection
-                        .padding(.top, 8)
+                        .padding(.top, 10)
                     
                     tieBreakToggle
+                        .padding(.top, 4) // Extra breathing room
                     
                     Spacer()
                     
                     startButton
                 }
                 .tag(1)
+                .padding(.horizontal, 8)
             }
             .tabViewStyle(.page(indexDisplayMode: .always))
             #else
-            VStack(spacing: 24) {
+            VStack(spacing: 32) { // Increased for iPhone too
                 Text("MATCH SETUP")
-                    .font(.system(size: 14, weight: .black, design: .rounded))
+                    .font(.system(size: 16, weight: .black, design: .rounded))
                     .foregroundColor(.yellow)
-                    .padding(.top, 12)
+                    .padding(.top, 20)
                 
                 pickerSection
                     .frame(height: 180)
                 
-                VStack(spacing: 16) {
+                VStack(spacing: 24) { // Increased for iPhone
                     servingSection
                     tieBreakToggle
                     startButton
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 20)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 30)
             }
             #endif
         }
@@ -61,38 +63,42 @@ struct MatchSettingsView: View {
     private var servingSection: some View {
         HStack {
             Text(platformLabel("WHO SERVES?"))
-                .font(.system(size: platformValue(watch: 11, ios: 13), weight: .bold, design: .rounded))
+                .font(.system(size: platformValue(watch: 11, ios: 14), weight: .bold, design: .rounded))
                 .foregroundColor(.white.opacity(0.9))
             
             Spacer()
             
-            HStack(spacing: 0) {
-                Button(action: { viewModel.state.servingTeam = 1 }) {
-                    Text(platformValue(watch: "T1", ios: "TEAM 1"))
-                        .font(.system(size: platformValue(watch: 10, ios: 11), weight: .black))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(viewModel.state.servingTeam == 1 ? Color.yellow : Color.white.opacity(0.08))
-                        .foregroundColor(viewModel.state.servingTeam == 1 ? .black : .white)
-                }
-                
-                Button(action: { viewModel.state.servingTeam = 2 }) {
-                    Text(platformValue(watch: "T2", ios: "TEAM 2"))
-                        .font(.system(size: platformValue(watch: 10, ios: 11), weight: .black))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(viewModel.state.servingTeam == 2 ? Color.yellow : Color.white.opacity(0.08))
-                        .foregroundColor(viewModel.state.servingTeam == 2 ? .black : .white)
-                }
+            HStack(spacing: 4) {
+                servingButton(team: 1, label: platformValue(watch: "T1", ios: "TEAM 1"))
+                servingButton(team: 2, label: platformValue(watch: "T2", ios: "TEAM 2"))
             }
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .padding(3)
+            .background(Color.white.opacity(0.08))
+            .clipShape(Capsule())
         }
+    }
+
+    private func servingButton(team: Int, label: String) -> some View {
+        Button(action: {
+            withAnimation(.spring(duration: 0.2)) {
+                viewModel.state.servingTeam = team
+            }
+        }) {
+            Text(label)
+                .font(.system(size: platformValue(watch: 10, ios: 11), weight: .black, design: .rounded))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(viewModel.state.servingTeam == team ? Color.yellow : Color.clear)
+                .foregroundColor(viewModel.state.servingTeam == team ? .black : .white.opacity(0.6))
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
     
     private var tieBreakToggle: some View {
         HStack {
             Text("TIE-BREAK")
-                .font(.system(size: platformValue(watch: 11, ios: 13), weight: .bold, design: .rounded))
+                .font(.system(size: platformValue(watch: 11, ios: 14), weight: .bold, design: .rounded))
                 .foregroundColor(.white.opacity(0.9))
             
             Spacer()
