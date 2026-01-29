@@ -1,16 +1,10 @@
 import Foundation
-#if !os(watchOS)
-import FirebaseFirestore
-#endif
-import PadelCore
-
-#if !os(watchOS)
-import FirebaseFirestore
-#endif
-import PadelCore
 import Combine
+import PadelCore
 
 #if !os(watchOS)
+import FirebaseFirestore
+
 /// Protocol to allow mocking Firestore for tests
 public protocol FirestoreSyncable {
     func setData(_ data: [String: Any], forDocument path: String) async throws
@@ -67,8 +61,8 @@ public class SyncService: ObservableObject, SyncProvider {
     /// Maps MatchState to Firestore dictionary
     public static func mapToFirestore(state: MatchState) -> [String: Any] {
         return [
-            "team1": "Team 1",
-            "team2": "Team 2",
+            "team1": state.team1.isEmpty ? "Team 1" : state.team1,
+            "team2": state.team2.isEmpty ? "Team 2" : state.team2,
             "score": [
                 "team1": state.isTieBreak ? "\(state.team1TieBreakPoints)" : state.team1Score.rawValue,
                 "team2": state.isTieBreak ? "\(state.team2TieBreakPoints)" : state.team2Score.rawValue

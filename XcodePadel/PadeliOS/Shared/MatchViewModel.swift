@@ -52,7 +52,10 @@ public class MatchViewModel {
         connectivity: ConnectivityProvider = ConnectivityService.shared,
         sync: SyncProvider? = nil // Defaulted below
     ) {
-        self.state = state
+        var initialState = state
+        if initialState.team1.isEmpty { initialState.team1 = "TEAM 1" }
+        if initialState.team2.isEmpty { initialState.team2 = "TEAM 2" }
+        self.state = initialState
         self.connectivity = connectivity
         
         #if !os(watchOS)

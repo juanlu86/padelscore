@@ -18,10 +18,11 @@ struct MatchSummaryView: View {
             Color.black.ignoresSafeArea()
             
             // Subtle Gradient Accent
-            LinearGradient(
-                colors: [Color.yellow.opacity(0.08), Color.clear],
-                startPoint: .top,
-                endPoint: .bottom
+            RadialGradient(
+                colors: [winner == 1 ? .green.opacity(0.12) : (winner == 2 ? .blue.opacity(0.12) : .yellow.opacity(0.12)), .clear],
+                center: .top,
+                startRadius: 0,
+                endRadius: 500
             )
             .ignoresSafeArea()
             
@@ -42,22 +43,39 @@ struct MatchSummaryView: View {
         VStack(spacing: 0) {
             // Compact Header
             HStack {
-                Text("Match result")
-                    .font(.system(size: platformValue(watch: 12, ios: 16), weight: .bold, design: .rounded))
-                    .foregroundColor(.white.opacity(0.8))
+                Text("MATCH RESULT")
+                    .font(.system(size: platformValue(watch: 10, ios: 12), weight: .black, design: .rounded))
+                    .tracking(2)
+                    .foregroundColor(.white.opacity(0.4))
                 Spacer()
                 Image(systemName: "circle.fill")
                     .font(.system(size: 4))
                     .foregroundColor(.yellow)
+                    .shadow(color: .yellow.opacity(0.5), radius: 2)
             }
             .padding(.horizontal, 16)
-            .padding(.top, platformValue(watch: 5, ios: 15))
-            .padding(.bottom, 4)
+            .padding(.top, platformValue(watch: 5, ios: 30))
+            .padding(.bottom, 12)
+            
+            // Winner Announcement (iOS only)
+            #if !os(watchOS)
+            VStack(spacing: 4) {
+                Text(winner != 0 ? "GAME SET MATCH" : "MATCH OVER")
+                    .font(.system(size: 32, weight: .black, design: .rounded))
+                    .foregroundColor(.white)
+                
+                Text(winner != 0 ? "TEAM \(winner) SECURES THE WIN" : "IT'S A DRAW")
+                    .font(.system(size: 10, weight: .black))
+                    .tracking(1)
+                    .foregroundColor(.zinc400)
+            }
+            .padding(.bottom, 40)
+            #endif
             
             // Compact Scoreboard (Glassmorphism)
             VStack(spacing: 0) {
                 ScoreboardRow(
-                    label: "TEAM 1",
+                    label: state.team1.isEmpty ? "TEAM 1" : state.team1.uppercased(),
                     results: state.completedSets.map { $0.team1Games },
                     opponentResults: state.completedSets.map { $0.team2Games },
                     isMatchWinner: winner == 1,
@@ -65,10 +83,10 @@ struct MatchSummaryView: View {
                 )
                 
                 Divider()
-                    .background(Color.white.opacity(0.1))
+                    .background(Color.white.opacity(0.05))
                 
                 ScoreboardRow(
-                    label: "TEAM 2",
+                    label: state.team2.isEmpty ? "TEAM 2" : state.team2.uppercased(),
                     results: state.completedSets.map { $0.team2Games },
                     opponentResults: state.completedSets.map { $0.team1Games },
                     isMatchWinner: winner == 2,
@@ -76,27 +94,35 @@ struct MatchSummaryView: View {
                 )
             }
             .background(
-                RoundedRectangle(cornerRadius: platformValue(watch: 12, ios: 16))
-                    .fill(Color.white.opacity(0.05))
+                RoundedRectangle(cornerRadius: platformValue(watch: 12, ios: 24))
+                    .fill(Color.white.opacity(0.03))
                     .overlay(
-                        RoundedRectangle(cornerRadius: platformValue(watch: 12, ios: 16))
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: platformValue(watch: 12, ios: 24))
+                            .stroke(Color.white.opacity(0.05), lineWidth: 1)
                     )
             )
             .padding(.horizontal, 8)
             
-            Spacer(minLength: platformValue(watch: 10, ios: 20))
+            Spacer(minLength: platformValue(watch: 10, ios: 40))
             
             // Actions
-            HStack(spacing: 8) {
+            HStack(spacing: 12) {
                 Button(action: onUndo) {
-                    Image(systemName: "arrow.uturn.backward")
-                        .font(.system(size: platformValue(watch: 12, ios: 14), weight: .black, design: .rounded))
-                        .foregroundColor(.orange)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, platformValue(watch: 8, ios: 12))
-                        .background(Color.orange.opacity(0.15))
-                        .cornerRadius(10)
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.uturn.backward")
+                        Text("UNDO")
+                            .font(.system(size: 10, weight: .black))
+                    }
+                    .font(.system(size: platformValue(watch: 12, ios: 14), weight: .black, design: .rounded))
+                    .foregroundColor(.orange)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, platformValue(watch: 8, ios: 18))
+                    .background(Color.white.opacity(0.05))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                    )
                 }
                 .buttonStyle(.plain)
                 
@@ -105,14 +131,15 @@ struct MatchSummaryView: View {
                         .font(.system(size: platformValue(watch: 12, ios: 14), weight: .black, design: .rounded))
                         .foregroundColor(.black)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, platformValue(watch: 8, ios: 12))
+                        .padding(.vertical, platformValue(watch: 8, ios: 18))
                         .background(Color.yellow.gradient)
-                        .cornerRadius(10)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: .yellow.opacity(0.3), radius: 10, y: 5)
                 }
                 .buttonStyle(.plain)
             }
             .padding(.horizontal, 8)
-            .padding(.bottom, platformValue(watch: 10, ios: 20))
+            .padding(.bottom, platformValue(watch: 10, ios: 40))
         }
     }
     
@@ -147,30 +174,30 @@ struct ScoreboardRow: View {
                 
                 Text(label)
                     .font(.system(size: platformValue(watch: 9, ios: 11), weight: .black, design: .rounded))
-                    .foregroundColor(isMatchWinner ? .white : .white.opacity(0.5))
+                    .foregroundColor(isMatchWinner ? .white : .white.opacity(0.4))
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
             }
-            .padding(.leading, 8)
-            .frame(width: platformValue(watch: 55, ios: 80), alignment: .leading)
+            .padding(.leading, 12)
+            .frame(width: platformValue(watch: 55, ios: 120), alignment: .leading)
             
             // Results
-            HStack(spacing: platformValue(watch: 4, ios: 12)) {
+            HStack(spacing: platformValue(watch: 4, ios: 16)) {
                 let maxSets = isGrandSlam ? 5 : 3
                 ForEach(0..<max(maxSets, results.count), id: \.self) { index in
                     let score = index < results.count ? results[index] : -1
                     let opponentScore = index < opponentResults.count ? opponentResults[index] : -1
                     
                     Text(score >= 0 ? "\(score)" : "–")
-                        .font(.system(size: platformValue(watch: 14, ios: 24), weight: .black, design: .monospaced))
-                        .foregroundColor(score >= 0 ? (score > opponentScore ? .yellow : .white) : .white.opacity(0.15))
-                        .frame(width: platformValue(watch: 14, ios: 25))
+                        .font(.system(size: platformValue(watch: 14, ios: 32), weight: .black, design: .monospaced))
+                        .foregroundColor(score >= 0 ? (score > opponentScore ? .yellow : .white) : .white.opacity(0.05))
+                        .frame(width: platformValue(watch: 14, ios: 30))
                 }
             }
-            .padding(.trailing, 8)
+            .padding(.trailing, 12)
             .frame(maxWidth: .infinity, alignment: .trailing)
         }
-        .frame(height: platformValue(watch: 35, ios: 60))
+        .frame(height: platformValue(watch: 35, ios: 80))
     }
     
     private func platformValue<T>(watch: T, ios: T) -> T {
@@ -180,6 +207,24 @@ struct ScoreboardRow: View {
         return ios
         #endif
     }
+}
+
+#Preview {
+    MatchSummaryView(state: MatchState(
+        team1Sets: 3,
+        team2Sets: 1,
+        scoringSystem: .standard,
+        useTieBreak: true,
+        isGrandSlam: true,
+        completedSets: [
+            SetResult(team1Games: 6, team2Games: 4),
+            SetResult(team1Games: 4, team2Games: 6),
+            SetResult(team1Games: 7, team2Games: 5),
+            SetResult(team1Games: 6, team2Games: 2)
+        ],
+        team1: "Galán/Lebrón",
+        team2: "Coello/Tapia"
+    ), onUndo: {}, onDismiss: {})
 }
 
 #Preview {

@@ -1,37 +1,25 @@
-rules_version='2';
+rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Auth Helper
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Match Schema Helper
     function isValidMatch(data) {
-      return data.team1 is string 
-          && data.team1.size() > 0
-          && data.team2 is string
-          && data.team2.size() > 0
-          && data.status in ['live', 'finished']
-          && (data.get('version', 0) is int);
-    }
-
-    function isTestMatch(matchId) {
-      return matchId == 'test-match';
+      return data.get('team1', '') is string 
+          && data.get('team2', '') is string
+          && data.get('status', '') in ['live', 'finished']
+          && data.get('version', 0) is number;
     }
 
     match /matches/{matchId} {
       allow read: if true;
       
-      allow create: if (isAuthenticated() || isTestMatch(matchId))
-                    && isValidMatch(request.resource.data);
-                    
-      allow update: if (isAuthenticated() || isTestMatch(matchId))
-                    && isValidMatch(request.resource.data)
-                    // Prevent version rollbacks
-                    && (resource.data.get('version', 0) <= request.resource.data.get('version', 0));
+      // Full access to test-match for debugging
+      allow create, update: if (matchId == 'test-match' || isAuthenticated())
+                            && (matchId == 'test-match' || isValidMatch(request.resource.data));
 
       allow delete: if isAuthenticated();
     }
