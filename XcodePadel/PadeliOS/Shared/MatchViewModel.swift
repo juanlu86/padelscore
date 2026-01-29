@@ -7,6 +7,9 @@ import PadelCore
 public class MatchViewModel {
     public var state: MatchState
     public var isMatchStarted: Bool = false
+    #if !os(watchOS)
+    public var syncStatus: SyncService.Status = .idle
+    #endif
     
     private let logic = PadelLogic()
     private var history: [MatchState] = []
@@ -14,6 +17,16 @@ public class MatchViewModel {
     
     public init(state: MatchState = MatchState()) {
         self.state = state
+        
+        #if !os(watchOS)
+        // Listen for sync status updates
+        SyncService.shared.$status
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                self?.syncStatus = status
+            }
+            .store(in: &cancellables)
+        #endif
         
         // Listen for updates from the other device
         Publishers.CombineLatest(

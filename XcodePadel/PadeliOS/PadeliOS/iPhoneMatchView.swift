@@ -76,6 +76,21 @@ struct iPhoneMatchView: View {
                 }
                 .navigationTitle("Match Manager")
                 .background(Color(.systemBackground))
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        syncIndicator
+                    }
+                }
+                .alert("Sync Failed", isPresented: Binding(
+                    get: { if case .failed = viewModel.syncStatus { return true } else { return false } },
+                    set: { if !$0 { SyncService.shared.status = .idle } }
+                )) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    if case .failed(let message) = viewModel.syncStatus {
+                        Text(message)
+                    }
+                }
                 
                 // Settings Overlay
                 if !viewModel.isMatchStarted {
@@ -97,6 +112,26 @@ struct iPhoneMatchView: View {
                 }
             }
         }
+    }
+    
+    private var syncIndicator: some View {
+        Group {
+            switch viewModel.syncStatus {
+            case .idle:
+                Image(systemName: "cloud")
+                    .foregroundColor(.secondary)
+            case .syncing:
+                ProgressView()
+                    .controlSize(.small)
+            case .synced:
+                Image(systemName: "cloud.checkmark.fill")
+                    .foregroundColor(.green)
+            case .failed:
+                Image(systemName: "cloud.badge.exclamationmark.fill")
+                    .foregroundColor(.red)
+            }
+        }
+        .symbolEffect(.bounce, value: viewModel.syncStatus)
     }
 }
 
