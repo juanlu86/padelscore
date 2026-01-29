@@ -62,6 +62,7 @@ public struct MatchState: Codable {
         scoringSystem: ScoringSystem = .standard,
         deuceCount: Int = 0,
         useTieBreak: Bool = true,
+        version: Int = 0,
         isTieBreak: Bool = false,
         isMatchOver: Bool = false,
         completedSets: [SetResult] = [],
@@ -78,6 +79,7 @@ public struct MatchState: Codable {
         self.scoringSystem = scoringSystem
         self.deuceCount = deuceCount
         self.useTieBreak = useTieBreak
+        self.version = version
         self.isTieBreak = isTieBreak
         self.isMatchOver = isMatchOver
         self.completedSets = completedSets

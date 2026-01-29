@@ -45,8 +45,14 @@ public class MatchViewModel {
     private func handleRemoteStateUpdate(_ newState: MatchState, isStarted: Bool) {
         print("📥 Received remote state update. Version: \(newState.version) (Current: \(state.version))")
         
-        // If the incoming version is greater, it means it's a new "event" in the match
-        // We should save our current state to history so we can undo it if needed
+        // Only accept updates if they have a newer or equal version
+        // (Equal version is allowed to handle metadata-only syncs if they ever occur)
+        guard newState.version >= state.version else {
+            print("⚠️ Ignoring stale remote update (v\(newState.version) < v\(state.version))")
+            return
+        }
+        
+        // If the incoming version is strictly greater, it means it's a new "event"
         if newState.version > state.version {
             history.append(state)
         }

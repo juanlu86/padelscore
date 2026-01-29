@@ -38,6 +38,10 @@ final class SyncServiceTests: XCTestCase {
         XCTAssertEqual(games?["team1"], 2)
         XCTAssertEqual(games?["team2"], 1)
         
+        XCTAssertEqual(data["version"] as? Int, state.version)
+        XCTAssertEqual(data["scoringSystem"] as? String, state.scoringSystem.rawValue)
+        XCTAssertEqual(data["deuceCount"] as? Int, state.deuceCount)
+        
         XCTAssertNotNil(data["updatedAt"])
     }
     
