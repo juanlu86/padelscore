@@ -24,6 +24,7 @@ struct WatchScoringView: View {
                         }
                         .font(.system(.caption2, weight: .bold))
                         .foregroundColor(.secondary)
+                        .padding(.top, 24) // Added padding to clear the system clock
 
                         // Scores Header
                         HStack(spacing: 12) {

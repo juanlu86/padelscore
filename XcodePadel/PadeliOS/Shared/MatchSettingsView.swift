@@ -9,12 +9,112 @@ struct MatchSettingsView: View {
         ZStack {
             Color.black.ignoresSafeArea()
             
-            VStack(spacing: 0) {
-                pickerSection
-                controlsSection
+            #if os(watchOS)
+            TabView {
+                // Page 1: Scoring System
+                VStack(spacing: 0) {
+                    Text("SYSTEM")
+                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .foregroundColor(.yellow)
+                        .padding(.top, 4)
+                    pickerSection
+                }
+                .tag(0)
+                
+                // Page 2: Serving & Ruels
+                VStack(spacing: 4) {
+                    servingSection
+                        .padding(.top, 8)
+                    
+                    tieBreakToggle
+                    
+                    Spacer()
+                    
+                    startButton
+                }
+                .tag(1)
             }
+            .tabViewStyle(.page(indexDisplayMode: .always))
+            #else
+            VStack(spacing: 24) {
+                Text("MATCH SETUP")
+                    .font(.system(size: 14, weight: .black, design: .rounded))
+                    .foregroundColor(.yellow)
+                    .padding(.top, 12)
+                
+                pickerSection
+                    .frame(height: 180)
+                
+                VStack(spacing: 16) {
+                    servingSection
+                    tieBreakToggle
+                    startButton
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 20)
+            }
+            #endif
         }
         .preferredColorScheme(.dark)
+    }
+    
+    private var servingSection: some View {
+        HStack {
+            Text(platformLabel("WHO SERVES?"))
+                .font(.system(size: platformValue(watch: 11, ios: 13), weight: .bold, design: .rounded))
+                .foregroundColor(.white.opacity(0.9))
+            
+            Spacer()
+            
+            HStack(spacing: 0) {
+                Button(action: { viewModel.state.servingTeam = 1 }) {
+                    Text(platformValue(watch: "T1", ios: "TEAM 1"))
+                        .font(.system(size: platformValue(watch: 10, ios: 11), weight: .black))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(viewModel.state.servingTeam == 1 ? Color.yellow : Color.white.opacity(0.08))
+                        .foregroundColor(viewModel.state.servingTeam == 1 ? .black : .white)
+                }
+                
+                Button(action: { viewModel.state.servingTeam = 2 }) {
+                    Text(platformValue(watch: "T2", ios: "TEAM 2"))
+                        .font(.system(size: platformValue(watch: 10, ios: 11), weight: .black))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(viewModel.state.servingTeam == 2 ? Color.yellow : Color.white.opacity(0.08))
+                        .foregroundColor(viewModel.state.servingTeam == 2 ? .black : .white)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+    }
+    
+    private var tieBreakToggle: some View {
+        HStack {
+            Text("TIE-BREAK")
+                .font(.system(size: platformValue(watch: 11, ios: 13), weight: .bold, design: .rounded))
+                .foregroundColor(.white.opacity(0.9))
+            
+            Spacer()
+            
+            Toggle("", isOn: $viewModel.state.useTieBreak)
+                .labelsHidden()
+                .tint(.yellow)
+                .scaleEffect(platformValue(watch: 0.9, ios: 1.0))
+        }
+    }
+    
+    private var startButton: some View {
+        Button(action: onStart) {
+            Text("START MATCH")
+                .font(.system(size: platformValue(watch: 13, ios: 16), weight: .black, design: .rounded))
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, platformValue(watch: 8, ios: 12))
+                .background(Color.yellow.gradient)
+                .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
     }
     
     private var pickerSection: some View {
@@ -69,68 +169,6 @@ struct MatchSettingsView: View {
                 .scaleEffect(scale)
                 .opacity(opacity)
         }
-    }
-    
-    private var controlsSection: some View {
-        VStack(spacing: 6) {
-            Divider().background(Color.white.opacity(0.1))
-            
-            // Serving Team Selection
-            HStack {
-                Text(platformLabel("WHO SERVES?"))
-                    .font(.system(size: platformValue(watch: 9, ios: 11), weight: .bold, design: .rounded))
-                    .foregroundColor(.white.opacity(0.7))
-                
-                Spacer()
-                
-                HStack(spacing: 0) {
-                    Button(action: { viewModel.state.servingTeam = 1 }) {
-                        Text(platformValue(watch: "T1", ios: "TEAM 1"))
-                            .font(.system(size: platformValue(watch: 9, ios: 10), weight: .black))
-                            .padding(.horizontal, platformValue(watch: 8, ios: 10))
-                            .padding(.vertical, platformValue(watch: 4, ios: 6))
-                            .background(viewModel.state.servingTeam == 1 ? Color.yellow : Color.white.opacity(0.05))
-                            .foregroundColor(viewModel.state.servingTeam == 1 ? .black : .white)
-                    }
-                    
-                    Button(action: { viewModel.state.servingTeam = 2 }) {
-                        Text(platformValue(watch: "T2", ios: "TEAM 2"))
-                            .font(.system(size: platformValue(watch: 9, ios: 10), weight: .black))
-                            .padding(.horizontal, platformValue(watch: 8, ios: 10))
-                            .padding(.vertical, platformValue(watch: 4, ios: 6))
-                            .background(viewModel.state.servingTeam == 2 ? Color.yellow : Color.white.opacity(0.05))
-                            .foregroundColor(viewModel.state.servingTeam == 2 ? .black : .white)
-                    }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.1), lineWidth: 1))
-            }
-            .padding(.horizontal, platformValue(watch: 4, ios: 12))
-            .padding(.vertical, platformValue(watch: 2, ios: 4))
-            
-            Toggle(isOn: $viewModel.state.useTieBreak) {
-                Text("TIE-BREAK")
-                    .font(.system(size: platformValue(watch: 9, ios: 11), weight: .bold, design: .rounded))
-                    .foregroundColor(.white.opacity(0.7))
-            }
-            .tint(.yellow)
-            .scaleEffect(platformValue(watch: 0.75, ios: 0.85))
-            .padding(.horizontal, platformValue(watch: 4, ios: 12))
-            
-            Button(action: onStart) {
-                Text("START")
-                    .font(.system(size: platformValue(watch: 12, ios: 14), weight: .black, design: .rounded))
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, platformValue(watch: 6, ios: 8))
-                    .background(Color.yellow.gradient)
-                    .cornerRadius(10)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, platformValue(watch: 4, ios: 8))
-            .padding(.bottom, platformValue(watch: 2, ios: 6))
-        }
-        .background(Color.black)
     }
 
     private func platformValue<T>(watch: T, ios: T) -> T {
