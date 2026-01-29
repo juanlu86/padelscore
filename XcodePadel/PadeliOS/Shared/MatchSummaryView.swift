@@ -110,8 +110,10 @@ struct MatchSummaryView: View {
                 Button(action: onUndo) {
                     HStack(spacing: 8) {
                         Image(systemName: "arrow.uturn.backward")
+                        #if !os(watchOS)
                         Text("UNDO")
                             .font(.system(size: 10, weight: .black))
+                        #endif
                     }
                     .font(.system(size: platformValue(watch: 12, ios: 14), weight: .black, design: .rounded))
                     .foregroundColor(.orange)
