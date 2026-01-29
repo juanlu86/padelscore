@@ -5,28 +5,63 @@ import FirebaseFirestore
 import PadelCore
 
 #if !os(watchOS)
-public class SyncService {
-    public static let shared = SyncService()
+import FirebaseFirestore
+#endif
+import PadelCore
+import Combine
+
+#if !os(watchOS)
+/// Protocol to allow mocking Firestore for tests
+public protocol FirestoreSyncable {
+    func setData(_ data: [String: Any], forDocument path: String) async throws
+}
+
+/// Production implementation of Firestore sync
+public class ProductionFirestore: FirestoreSyncable {
     private let db = Firestore.firestore()
+    public init() {}
+    public func setData(_ data: [String: Any], forDocument path: String) async throws {
+        try await db.collection("matches").document(path).setData(data, merge: true)
+    }
+}
+
+public class SyncService: ObservableObject {
+    public enum Status: Equatable {
+        case idle
+        case syncing
+        case synced
+        case failed(String)
+    }
     
-    private init() {}
+    @Published public var status: Status = .idle
+    public static let shared = SyncService()
     
-    /// Syncs the match state to Firestore in a background task
+    private let syncProvider: FirestoreSyncable
+    
+    /// Initializer with dependency injection
+    public init(provider: FirestoreSyncable = ProductionFirestore()) {
+        self.syncProvider = provider
+    }
+    
+    /// Syncs the match state to Firestore
     public func syncMatch(state: MatchState) {
-        // Run in a detached task to ensure it's truly off the main actor
-        Task.detached(priority: .background) {
+        self.status = .syncing
+        
+        Task { @MainActor in
             let data = SyncService.mapToFirestore(state: state)
             
             do {
-                try await self.db.collection("matches").document("test-match").setData(data, merge: true)
+                try await self.syncProvider.setData(data, forDocument: "test-match")
+                self.status = .synced
                 print("✅ Match synced to Firestore")
             } catch {
+                self.status = .failed(error.localizedDescription)
                 print("❌ Sync failed: \(error.localizedDescription)")
             }
         }
     }
     
-    /// Maps MatchState to Firestore dictionary (Internal for testing)
+    /// Maps MatchState to Firestore dictionary
     public static func mapToFirestore(state: MatchState) -> [String: Any] {
         return [
             "team1": "Team 1",
