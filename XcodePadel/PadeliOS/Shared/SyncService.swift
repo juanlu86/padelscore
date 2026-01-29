@@ -25,7 +25,10 @@ public class ProductionFirestore: FirestoreSyncable {
     }
 }
 
-public class SyncService: ObservableObject {
+public class SyncService: ObservableObject, SyncProvider {
+    public var statusPublisher: AnyPublisher<Status, Never> {
+        $status.eraseToAnyPublisher()
+    }
     public enum Status: Equatable {
         case idle
         case syncing

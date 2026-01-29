@@ -3,11 +3,19 @@ import WatchConnectivity
 import Combine
 import PadelCore
 
-public class ConnectivityService: NSObject, ObservableObject, WCSessionDelegate {
+public class ConnectivityService: NSObject, ObservableObject, WCSessionDelegate, ConnectivityProvider {
     public static let shared = ConnectivityService()
     
     @Published public var receivedState: MatchState?
     @Published public var receivedIsStarted: Bool?
+    
+    public var receivedStatePublisher: AnyPublisher<MatchState?, Never> {
+        $receivedState.eraseToAnyPublisher()
+    }
+    
+    public var receivedIsStartedPublisher: AnyPublisher<Bool?, Never> {
+        $receivedIsStarted.eraseToAnyPublisher()
+    }
     
     private var lastReceivedVersion: Int = -1
     private var pendingSync: (MatchState, Bool)?

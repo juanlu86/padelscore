@@ -42,12 +42,24 @@ public class MatchViewModel {
     private let workoutManager = WorkoutManager()
     #endif
     
-    public init(state: MatchState = MatchState()) {
+    private let connectivity: ConnectivityProvider
+    #if !os(watchOS)
+    private let sync: SyncProvider
+    #endif
+    
+    public init(
+        state: MatchState = MatchState(),
+        connectivity: ConnectivityProvider = ConnectivityService.shared,
+        sync: SyncProvider? = nil // Defaulted below
+    ) {
         self.state = state
+        self.connectivity = connectivity
         
         #if !os(watchOS)
+        self.sync = sync ?? SyncService.shared
+        
         // Listen for sync status updates
-        SyncService.shared.$status
+        self.sync.statusPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
                 self?.syncStatus = status
@@ -57,8 +69,8 @@ public class MatchViewModel {
         
         // Listen for updates from the other device
         Publishers.CombineLatest(
-            ConnectivityService.shared.$receivedState,
-            ConnectivityService.shared.$receivedIsStarted
+            self.connectivity.receivedStatePublisher,
+            self.connectivity.receivedIsStartedPublisher
         )
         .receive(on: DispatchQueue.main)
         .sink { [weak self] state, isStarted in
@@ -74,12 +86,12 @@ public class MatchViewModel {
         isMatchStarted = true
         state.version += 1
         #if !os(watchOS)
-        SyncService.shared.syncMatch(state: state)
+        sync.syncMatch(state: state)
         #else
         workoutManager.requestAuthorization()
         workoutManager.startWorkout()
         #endif
-        ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
+        connectivity.send(state: state, isStarted: isMatchStarted)
     }
     
     public func scorePoint(forTeam1: Bool) {
@@ -89,9 +101,9 @@ public class MatchViewModel {
         history.append(state)
         state = logic.scorePoint(forTeam1: forTeam1, currentState: state)
         #if !os(watchOS)
-        SyncService.shared.syncMatch(state: state)
+        sync.syncMatch(state: state)
         #endif
-        ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
+        connectivity.send(state: state, isStarted: isMatchStarted)
     }
     
     public func undoPoint() {
@@ -102,9 +114,9 @@ public class MatchViewModel {
         state.version = nextVersion
         
         #if !os(watchOS)
-        SyncService.shared.syncMatch(state: state)
+        sync.syncMatch(state: state)
         #endif
-        ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
+        connectivity.send(state: state, isStarted: isMatchStarted)
     }
     
     public func finishMatch() {
@@ -128,11 +140,11 @@ public class MatchViewModel {
         state.isMatchOver = true
         state.version += 1
         #if !os(watchOS)
-        SyncService.shared.syncMatch(state: state)
+        sync.syncMatch(state: state)
         #else
         workoutManager.endWorkout()
         #endif
-        ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
+        connectivity.send(state: state, isStarted: isMatchStarted)
     }
     
     public func resetMatch() {
@@ -147,11 +159,11 @@ public class MatchViewModel {
         state = newState
         isMatchStarted = false
         #if !os(watchOS)
-        SyncService.shared.syncMatch(state: state)
+        sync.syncMatch(state: state)
         #else
         workoutManager.endWorkout()
         #endif
-        ConnectivityService.shared.send(state: state, isStarted: isMatchStarted)
+        connectivity.send(state: state, isStarted: isMatchStarted)
     }
     
     public var canUndo: Bool {
@@ -180,4 +192,24 @@ private extension MatchViewModel {
             self.isMatchStarted = isStarted
         }
     }
+}
+
+// MARK: - Protocols
+
+public protocol ConnectivityProvider: AnyObject {
+    var receivedState: MatchState? { get }
+    var receivedIsStarted: Bool? { get }
+    
+    var receivedStatePublisher: AnyPublisher<MatchState?, Never> { get }
+    var receivedIsStartedPublisher: AnyPublisher<Bool?, Never> { get }
+    
+    func send(state: MatchState, isStarted: Bool)
+}
+
+public protocol SyncProvider: AnyObject {
+    #if !os(watchOS)
+    var status: SyncService.Status { get }
+    var statusPublisher: AnyPublisher<SyncService.Status, Never> { get }
+    func syncMatch(state: MatchState)
+    #endif
 }
