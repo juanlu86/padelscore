@@ -11,6 +11,30 @@ public class MatchViewModel {
     public var syncStatus: SyncService.Status = .idle
     #endif
     
+    // MARK: - Display Properties
+    
+    public var team1DisplayScore: String {
+        state.isTieBreak ? "\(state.team1TieBreakPoints)" : state.team1Score.rawValue
+    }
+    
+    public var team2DisplayScore: String {
+        state.isTieBreak ? "\(state.team2TieBreakPoints)" : state.team2Score.rawValue
+    }
+    
+    public var specialPointLabel: String? {
+        guard state.team1Score == .forty && state.team2Score == .forty else { return nil }
+        
+        switch state.scoringSystem {
+        case .goldenPoint:
+            return "GOLDEN POINT"
+        case .starPoint:
+            return state.deuceCount >= 3 ? "STAR POINT" : nil
+        case .standard:
+            return nil
+        }
+    }
+    
+    // MARK: - Internal Dependencies
     private let logic = PadelLogic()
     private var history: [MatchState] = []
     private var cancellables = Set<AnyCancellable>()
@@ -45,26 +69,6 @@ public class MatchViewModel {
         .store(in: &cancellables)
     }
     
-    private func handleRemoteStateUpdate(_ newState: MatchState, isStarted: Bool) {
-        print("📥 Received remote state update. Version: \(newState.version) (Current: \(state.version))")
-        
-        // Only accept updates if they have a newer or equal version
-        // (Equal version is allowed to handle metadata-only syncs if they ever occur)
-        guard newState.version >= state.version else {
-            print("⚠️ Ignoring stale remote update (v\(newState.version) < v\(state.version))")
-            return
-        }
-        
-        // If the incoming version is strictly greater, it means it's a new "event"
-        if newState.version > state.version {
-            history.append(state)
-        }
-        
-        withAnimation(.spring()) {
-            self.state = newState
-            self.isMatchStarted = isStarted
-        }
-    }
     
     public func startMatch() {
         isMatchStarted = true
@@ -152,5 +156,28 @@ public class MatchViewModel {
     
     public var canUndo: Bool {
         return !history.isEmpty
+    }
+}
+
+// MARK: - Private Helpers
+private extension MatchViewModel {
+    func handleRemoteStateUpdate(_ newState: MatchState, isStarted: Bool) {
+        print("📥 Received remote state update. Version: \(newState.version) (Current: \(state.version))")
+        
+        // Only accept updates if they have a newer or equal version
+        guard newState.version >= state.version else {
+            print("⚠️ Ignoring stale remote update (v\(newState.version) < v\(state.version))")
+            return
+        }
+        
+        // If the incoming version is strictly greater, it means it's a new "event"
+        if newState.version > state.version {
+            history.append(state)
+        }
+        
+        withAnimation(.spring()) {
+            self.state = newState
+            self.isMatchStarted = isStarted
+        }
     }
 }

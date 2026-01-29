@@ -12,9 +12,9 @@ struct iPhoneMatchView: View {
                         // Match Status Card
                         VStack(spacing: 16) {
                             HStack {
-                                TeamScoreCard(
+                                ScoreCardView(
                                     name: "Galán/Lebrón",
-                                    score: viewModel.state.isTieBreak ? "\(viewModel.state.team1TieBreakPoints)" : viewModel.state.team1Score.rawValue,
+                                    score: viewModel.team1DisplayScore,
                                     games: viewModel.state.team1Games,
                                     sets: viewModel.state.team1Sets,
                                     isServing: viewModel.state.servingTeam == 1,
@@ -22,20 +22,11 @@ struct iPhoneMatchView: View {
                                     onTap: { viewModel.scorePoint(forTeam1: true) }
                                 )
                                 
-                                VStack {
-                                    if viewModel.state.isTieBreak {
-                                        Text("TIE-BREAK")
-                                            .font(.system(size: 8, weight: .black))
-                                            .foregroundColor(.yellow)
-                                    }
-                                    Text("VS")
-                                        .font(.system(.headline, design: .default, weight: .black))
-                                        .foregroundColor(.secondary.opacity(0.5))
-                                }
+                                vsIndicator
                                 
-                                TeamScoreCard(
+                                ScoreCardView(
                                     name: "Coello/Tapia",
-                                    score: viewModel.state.isTieBreak ? "\(viewModel.state.team2TieBreakPoints)" : viewModel.state.team2Score.rawValue,
+                                    score: viewModel.team2DisplayScore,
                                     games: viewModel.state.team2Games,
                                     sets: viewModel.state.team2Sets,
                                     isServing: viewModel.state.servingTeam == 2,
@@ -55,15 +46,15 @@ struct iPhoneMatchView: View {
                                 .padding(.horizontal)
                             
                             HStack(spacing: 12) {
-                                ActionButton(title: "Reset Match", icon: "arrow.counterclockwise", color: .red) {
+                                CircularActionButton(title: "Reset Match", icon: "arrow.counterclockwise", color: .red) {
                                     viewModel.resetMatch()
                                 }
                                 
-                                ActionButton(title: "Finish Match", icon: "checkmark.circle", color: .green) {
+                                CircularActionButton(title: "Finish Match", icon: "checkmark.circle", color: .green) {
                                     viewModel.finishMatch()
                                 }
                                 
-                                ActionButton(title: "Undo Point", icon: "arrow.uturn.backward", color: .orange) {
+                                CircularActionButton(title: "Undo Point", icon: "arrow.uturn.backward", color: .orange) {
                                     viewModel.undoPoint()
                                 }
                                 .disabled(!viewModel.canUndo)
@@ -114,29 +105,25 @@ struct iPhoneMatchView: View {
                 )
             }
             .overlay(alignment: .top) {
-                if let label = specialPointLabel {
+                if let label = viewModel.specialPointLabel {
                     SpecialPointIndicator(label: label)
-                        .padding(.top, 120) // Positioned nicely below the navigation title area
+                        .padding(.top, 120)
                 }
             }
         }
     }
     
-    private var specialPointLabel: String? {
-        let state = viewModel.state
-        guard state.team1Score == .forty && state.team2Score == .forty else { return nil }
-        
-        switch state.scoringSystem {
-        case .goldenPoint:
-            return "GOLDEN POINT"
-        case .starPoint:
-            if state.deuceCount >= 3 {
-                return "STAR POINT"
+    private var vsIndicator: some View {
+        VStack {
+            if viewModel.state.isTieBreak {
+                Text("TIE-BREAK")
+                    .font(.system(size: 8, weight: .black))
+                    .foregroundColor(.yellow)
             }
-        case .standard:
-            return nil
+            Text("VS")
+                .font(.system(.headline, design: .default, weight: .black))
+                .foregroundColor(.secondary.opacity(0.5))
         }
-        return nil
     }
     
     private var syncIndicator: some View {
@@ -160,7 +147,13 @@ struct iPhoneMatchView: View {
     }
 }
 
-struct TeamScoreCard: View {
+#Preview {
+    iPhoneMatchView()
+}
+
+// MARK: - UI Components
+
+struct ScoreCardView: View {
     let name: String
     let score: String
     let games: Int
@@ -228,7 +221,7 @@ struct TeamScoreCard: View {
     }
 }
 
-struct ActionButton: View {
+struct CircularActionButton: View {
     let title: String
     let icon: String
     let color: Color
@@ -250,10 +243,6 @@ struct ActionButton: View {
             .clipShape(RoundedRectangle(cornerRadius: 16))
         }
     }
-}
-
-#Preview {
-    iPhoneMatchView()
 }
 
 struct SpecialPointIndicator: View {
