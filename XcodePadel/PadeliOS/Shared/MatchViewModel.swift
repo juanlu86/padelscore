@@ -52,6 +52,7 @@ public class MatchViewModel {
     
     public func startMatch() {
         isMatchStarted = true
+        state.version += 1
         #if !os(watchOS)
         SyncService.shared.syncMatch(state: state)
         #endif
@@ -73,6 +74,7 @@ public class MatchViewModel {
     public func undoPoint() {
         guard !history.isEmpty else { return }
         state = history.removeLast()
+        state.version += 1
         #if !os(watchOS)
         SyncService.shared.syncMatch(state: state)
         #endif
@@ -89,6 +91,7 @@ public class MatchViewModel {
         }
         
         state.isMatchOver = true
+        state.version += 1
         #if !os(watchOS)
         SyncService.shared.syncMatch(state: state)
         #endif
@@ -97,7 +100,9 @@ public class MatchViewModel {
     
     public func resetMatch() {
         history.removeAll()
-        state = MatchState()
+        var newState = MatchState()
+        newState.version = state.version + 1
+        state = newState
         isMatchStarted = false
         #if !os(watchOS)
         SyncService.shared.syncMatch(state: state)

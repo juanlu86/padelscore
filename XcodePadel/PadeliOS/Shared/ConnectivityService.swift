@@ -9,6 +9,7 @@ public class ConnectivityService: NSObject, ObservableObject, WCSessionDelegate 
     @Published public var receivedState: MatchState?
     @Published public var receivedIsStarted: Bool?
     
+    private var lastReceivedVersion: Int = -1
     private var pendingSync: (MatchState, Bool)?
     
     private override init() {
@@ -35,6 +36,10 @@ public class ConnectivityService: NSObject, ObservableObject, WCSessionDelegate 
         do {
             let encoder = JSONEncoder()
             let data = try encoder.encode(state)
+            
+            // Update local tracking so we don't process OLDER versions later
+            self.lastReceivedVersion = state.version
+            
             let context: [String: Any] = [
                 "matchState": data,
                 "isStarted": isStarted,
@@ -91,6 +96,16 @@ public class ConnectivityService: NSObject, ObservableObject, WCSessionDelegate 
         do {
             let decoder = JSONDecoder()
             let state = try decoder.decode(MatchState.self, from: data)
+            
+            // LOGICAL VERSION FILTERING
+            // Only process if the incoming state has a GREATER version than what we last processed
+            guard state.version > lastReceivedVersion else {
+                print("📩 Ignoring stale state version (Incoming: \(state.version) <= Current: \(lastReceivedVersion))")
+                return
+            }
+            
+            self.lastReceivedVersion = state.version
+            
             let isStarted = context["isStarted"] as? Bool ?? true
             
             DispatchQueue.main.async {

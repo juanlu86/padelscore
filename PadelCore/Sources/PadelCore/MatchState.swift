@@ -41,6 +41,7 @@ public struct MatchState: Codable {
     public var scoringSystem: ScoringSystem = .standard
     public var deuceCount: Int = 0
     public var useTieBreak: Bool = true
+    public var version: Int = 0
     
     public var isTieBreak: Bool = false
     public var isMatchOver: Bool = false
@@ -59,7 +60,7 @@ public struct MatchState: Codable {
         team1TieBreakPoints: Int = 0,
         team2TieBreakPoints: Int = 0,
         scoringSystem: ScoringSystem = .standard,
-        deuceCount: Int = 1,
+        deuceCount: Int = 0,
         useTieBreak: Bool = true,
         isTieBreak: Bool = false,
         isMatchOver: Bool = false,

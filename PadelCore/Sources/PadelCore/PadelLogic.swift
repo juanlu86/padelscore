@@ -7,6 +7,7 @@ public class PadelLogic {
         if currentState.isMatchOver { return currentState }
         
         var newState = currentState
+        newState.version += 1
         
         if currentState.isTieBreak {
             newState = scoreTieBreakPoint(forTeam1: forTeam1, state: newState)

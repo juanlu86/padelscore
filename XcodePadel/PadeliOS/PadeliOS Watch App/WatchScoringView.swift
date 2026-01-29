@@ -91,6 +91,19 @@ struct WatchScoringView: View {
                 .tabViewStyle(.verticalPage)
                 .navigationTitle("Padel Score")
                 .transition(.opacity)
+                .overlay(alignment: .top) {
+                    if let label = specialPointLabel {
+                        SpecialPointIndicator(label: label)
+                            .padding(.top, 8)
+                    }
+                }
+                .onChange(of: specialPointLabel) { _, new in
+                    if new != nil {
+                        #if os(watchOS)
+                        WKInterfaceDevice.current().play(.notification)
+                        #endif
+                    }
+                }
             }
         }
         .fullScreenCover(isPresented: .init(
@@ -101,6 +114,53 @@ struct WatchScoringView: View {
                 viewModel.resetMatch()
             }
         }
+    }
+    
+    private var specialPointLabel: String? {
+        let state = viewModel.state
+        guard state.team1Score == .forty && state.team2Score == .forty else { return nil }
+        
+        switch state.scoringSystem {
+        case .goldenPoint:
+            return "GOLDEN POINT"
+        case .starPoint:
+            if state.deuceCount >= 3 {
+                return "STAR POINT"
+            }
+        case .standard:
+            return nil
+        }
+        return nil
+    }
+}
+
+struct SpecialPointIndicator: View {
+    let label: String
+    @State private var pulseScale: CGFloat = 1.0
+    
+    var body: some View {
+        Text(label)
+            .font(.system(size: 10, weight: .black, design: .rounded))
+            .foregroundColor(.black)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background {
+                Capsule()
+                    .fill(label.contains("STAR") ? 
+                          LinearGradient(colors: [.yellow, .orange], startPoint: .topLeading, endPoint: .bottomTrailing) :
+                          LinearGradient(colors: [.yellow, .white, .yellow], startPoint: .topLeading, endPoint: .bottomTrailing))
+            }
+            .scaleEffect(pulseScale)
+            .shadow(color: .yellow.opacity(0.5), radius: 10)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                    pulseScale = 1.1
+                }
+            }
+            .onDisappear {
+                pulseScale = 1.0
+            }
+            .transition(.asymmetric(insertion: .move(edge: .top).combined(with: .opacity), removal: .opacity))
     }
 }
 
