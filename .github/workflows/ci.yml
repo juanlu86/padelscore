@@ -80,5 +80,18 @@ jobs:
       - name: List destinations (for debugging)
         run: xcodebuild -showdestinations -project XcodePadel/PadeliOS/PadeliOS.xcodeproj -scheme PadeliOS
       - name: Run iOS Tests
-        # Using a generic iPhone 15 simulator for CI
-        run: xcodebuild test -project XcodePadel/PadeliOS/PadeliOS.xcodeproj -scheme PadeliOS -destination 'platform=iOS Simulator,name=iPhone 15' -only-testing PadeliOSTests/SyncServiceTests
+        run: |
+          # Find first available iPhone simulator ID
+          DESTINATION_ID=$(xcrun simctl list devices available | grep iPhone | head -1 | sed -n 's/.*(\([-A-Z0-9]*\)).*/\1/p')
+          echo "Selected Destination ID: $DESTINATION_ID"
+          
+          if [ -z "$DESTINATION_ID" ]; then
+            echo "Error: No available iPhone simulator found"
+            exit 1
+          fi
+          
+          xcodebuild test -project XcodePadel/PadeliOS/PadeliOS.xcodeproj \
+            -scheme PadeliOS \
+            -destination "id=$DESTINATION_ID" \
+            -only-testing PadeliOSTests/SyncServiceTests \
+            CODE_SIGNING_ALLOWED=NO
