@@ -1,4 +1,4 @@
-# Project: PadelScore Master (Antigravity Edition)
+# Project: PadelScore Master
 
 ## 🎯 Global Vision
 A unified Padel scoring ecosystem. The **Apple Watch** is the primary input, the **iPhone** is the manager, and **Firebase** (Standard Hosting) is the backbone for the **Web Spectator** dashboard.

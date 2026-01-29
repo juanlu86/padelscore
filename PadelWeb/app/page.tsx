@@ -168,7 +168,7 @@ export default function Home() {
         {/* Footer Info */}
         <div className="bg-white/2 p-6 border-t border-white/5">
           <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 tracking-widest uppercase">
-            <span>Powered by Antigravity PadelScore</span>
+            <span>Powered by PadelScore</span>
             <span>Ref: {matchData.updatedAt?.seconds || '—'}</span>
           </div>
         </div>

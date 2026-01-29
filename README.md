@@ -95,4 +95,4 @@ PadelScore supports three major padel scoring systems:
 
 ## 🤝 Contributing
 
-This project is built with **Antigravity**. All logic is verified via unit tests in `PadelCoreTests`.
+This project is verified via unit tests in `PadelCoreTests`.
