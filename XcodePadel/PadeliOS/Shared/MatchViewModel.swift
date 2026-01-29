@@ -43,7 +43,14 @@ public class MatchViewModel {
     }
     
     private func handleRemoteStateUpdate(_ newState: MatchState, isStarted: Bool) {
-        print("📥 Received remote state update. Started: \(isStarted), Match over: \(newState.isMatchOver)")
+        print("📥 Received remote state update. Version: \(newState.version) (Current: \(state.version))")
+        
+        // If the incoming version is greater, it means it's a new "event" in the match
+        // We should save our current state to history so we can undo it if needed
+        if newState.version > state.version {
+            history.append(state)
+        }
+        
         withAnimation(.spring()) {
             self.state = newState
             self.isMatchStarted = isStarted
@@ -73,8 +80,10 @@ public class MatchViewModel {
     
     public func undoPoint() {
         guard !history.isEmpty else { return }
+        let nextVersion = state.version + 1
         state = history.removeLast()
-        state.version += 1
+        state.version = nextVersion
+        
         #if !os(watchOS)
         SyncService.shared.syncMatch(state: state)
         #endif

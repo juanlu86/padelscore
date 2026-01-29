@@ -6,11 +6,21 @@ import { db } from '../lib/firebase';
 
 export default function Home() {
   const [matchData, setMatchData] = useState<any>(null);
+  const [lastVersion, setLastVersion] = useState<number>(-1);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "matches", "test-match"), (doc) => {
       if (doc.exists()) {
-        setMatchData(doc.data());
+        const data = doc.data();
+        const newVersion = Number(data.version ?? 0);
+
+        // Only update if the version is newer or if we don't have a version yet
+        // (We don't strictly block equal versions on web because Firestore 
+        // snapshots might trigger for server timestamp resolution)
+        if (newVersion >= lastVersion) {
+          setMatchData(data);
+          setLastVersion(newVersion);
+        }
       } else {
         console.log("No such document!");
       }

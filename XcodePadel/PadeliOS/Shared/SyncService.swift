@@ -86,6 +86,7 @@ public class SyncService: ObservableObject {
             "status": state.isMatchOver ? "finished" : "live",
             "scoringSystem": state.scoringSystem.rawValue,
             "deuceCount": state.deuceCount,
+            "version": state.version,
             "updatedAt": FieldValue.serverTimestamp()
         ]
     }
