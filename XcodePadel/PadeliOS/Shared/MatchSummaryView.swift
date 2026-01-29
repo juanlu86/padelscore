@@ -7,7 +7,9 @@ struct MatchSummaryView: View {
     let onDismiss: () -> Void
     
     var winner: Int {
-        state.team1Sets > state.team2Sets ? 1 : 2
+        if state.team1Sets > state.team2Sets { return 1 }
+        if state.team2Sets > state.team1Sets { return 2 }
+        return 0 // Tie
     }
     
     var body: some View {
