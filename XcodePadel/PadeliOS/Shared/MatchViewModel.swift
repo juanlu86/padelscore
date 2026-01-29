@@ -112,6 +112,15 @@ public class MatchViewModel {
             state.completedSets.append(SetResult(team1Games: state.team1Games, team2Games: state.team2Games))
         }
         
+        // Reset current set progress on finish to avoid duplication in UI
+        state.team1Games = 0
+        state.team2Games = 0
+        state.team1Score = .zero
+        state.team2Score = .zero
+        state.team1TieBreakPoints = 0
+        state.team2TieBreakPoints = 0
+        state.isTieBreak = false
+        
         state.isMatchOver = true
         state.version += 1
         #if !os(watchOS)
