@@ -29,6 +29,9 @@ struct MatchSettingsView: View {
                     tieBreakToggle
                         .padding(.top, 4) // Extra breathing room
                     
+                    grandSlamToggle
+                        .padding(.top, 4)
+                    
                     Spacer()
                     
                     startButton
@@ -50,6 +53,7 @@ struct MatchSettingsView: View {
                 VStack(spacing: 24) { // Increased for iPhone
                     servingSection
                     tieBreakToggle
+                    grandSlamToggle
                     startButton
                 }
                 .padding(.horizontal, 24)
@@ -104,6 +108,21 @@ struct MatchSettingsView: View {
             Spacer()
             
             Toggle("", isOn: $viewModel.state.useTieBreak)
+                .labelsHidden()
+                .tint(.yellow)
+                .scaleEffect(platformValue(watch: 0.9, ios: 1.0))
+        }
+    }
+    
+    private var grandSlamToggle: some View {
+        HStack {
+            Text("GRAND SLAM")
+                .font(.system(size: platformValue(watch: 11, ios: 14), weight: .bold, design: .rounded))
+                .foregroundColor(.white.opacity(0.9))
+            
+            Spacer()
+            
+            Toggle("", isOn: $viewModel.state.isGrandSlam)
                 .labelsHidden()
                 .tint(.yellow)
                 .scaleEffect(platformValue(watch: 0.9, ios: 1.0))

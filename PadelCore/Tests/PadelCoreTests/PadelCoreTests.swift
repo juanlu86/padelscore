@@ -219,4 +219,27 @@ final class PadelLogicTests: XCTestCase {
         XCTAssertEqual(state.team1Score, .advantage, "Should enter advantage, not win game immediately")
         XCTAssertEqual(state.team1Games, 1, "Game 2 should still be in progress")
     }
+    
+    func testMatchWinGrandSlam() {
+        // Grand Slam mode, 2 sets to 0, 5-0 in games, 40-0 in points
+        var state = MatchState(team1Score: .forty, team1Games: 5, team1Sets: 2, isGrandSlam: true)
+        
+        // 1. Win Set -> 3 sets to 0 -> Match is NOT over if it was best of 3, but IS over for Grand Slam
+        // Wait, best of 5 means whoever wins 3 sets first wins.
+        state = logic.scorePoint(forTeam1: true, currentState: state)
+        XCTAssertEqual(state.team1Sets, 3)
+        XCTAssertTrue(state.isMatchOver)
+        
+        // 2. Verify normal mode still ends at 2 sets
+        var normalState = MatchState(team1Score: .forty, team1Games: 5, team1Sets: 1, isGrandSlam: false)
+        normalState = logic.scorePoint(forTeam1: true, currentState: normalState)
+        XCTAssertEqual(normalState.team1Sets, 2)
+        XCTAssertTrue(normalState.isMatchOver)
+        
+        // 3. Verify Grand Slam DOES NOT end at 2 sets
+        var gsInProgress = MatchState(team1Score: .forty, team1Games: 5, team1Sets: 1, isGrandSlam: true)
+        gsInProgress = logic.scorePoint(forTeam1: true, currentState: gsInProgress)
+        XCTAssertEqual(gsInProgress.team1Sets, 2)
+        XCTAssertFalse(gsInProgress.isMatchOver, "Grand slam should continue to 3 sets")
+    }
 }

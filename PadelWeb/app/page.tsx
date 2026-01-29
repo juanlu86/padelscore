@@ -51,7 +51,7 @@ export default function Home() {
 
   // Decide which sets to show
   // If match is over, we don't need to show an empty "current" set if it has no points
-  const hasCurrentGamePoints = matchData.games?.team1 > 0 || matchData.games?.team2 > 0;
+  const hasCurrentGamePoints = (matchData.games?.team1 ?? 0) > 0 || (matchData.games?.team2 ?? 0) > 0;
   const setsToShow = [...completedSets];
   if (!isMatchOver || hasCurrentGamePoints) {
     setsToShow.push({

@@ -160,8 +160,9 @@ public class PadelLogic {
         newState.team1Games = 0
         newState.team2Games = 0
         
-        // Check for Match win (Best of 3)
-        if newState.team1Sets == 2 || newState.team2Sets == 2 {
+        // Check for Match win (Best of 3 vs Best of 5)
+        let setsToWin = newState.isGrandSlam ? 3 : 2
+        if newState.team1Sets == setsToWin || newState.team2Sets == setsToWin {
             newState.isMatchOver = true
         }
         
