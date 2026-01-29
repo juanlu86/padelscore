@@ -105,11 +105,13 @@ struct iPhoneMatchView: View {
             }
             .fullScreenCover(isPresented: .init(
                 get: { viewModel.state.isMatchOver },
-                set: { if !$0 { viewModel.resetMatch() } }
+                set: { if !$0 && viewModel.state.isMatchOver { viewModel.resetMatch() } }
             )) {
-                MatchSummaryView(state: viewModel.state) {
-                    viewModel.resetMatch()
-                }
+                MatchSummaryView(
+                    state: viewModel.state,
+                    onUndo: { viewModel.undoPoint() },
+                    onDismiss: { viewModel.resetMatch() }
+                )
             }
             .overlay(alignment: .top) {
                 if let label = specialPointLabel {

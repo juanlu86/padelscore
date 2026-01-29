@@ -94,6 +94,7 @@ public class MatchViewModel {
         guard !history.isEmpty else { return }
         let nextVersion = state.version + 1
         state = history.removeLast()
+        state.isMatchOver = false // Ensure match is not over after undoing the finish
         state.version = nextVersion
         
         #if !os(watchOS)

@@ -3,6 +3,7 @@ import PadelCore
 
 struct MatchSummaryView: View {
     let state: MatchState
+    let onUndo: () -> Void
     let onDismiss: () -> Void
     
     var winner: Int {
@@ -85,16 +86,29 @@ struct MatchSummaryView: View {
             Spacer(minLength: platformValue(watch: 10, ios: 20))
             
             // Actions
-            Button(action: onDismiss) {
-                Text("DONE")
-                    .font(.system(size: platformValue(watch: 12, ios: 14), weight: .black, design: .rounded))
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, platformValue(watch: 8, ios: 12))
-                    .background(Color.yellow.gradient)
-                    .cornerRadius(10)
+            HStack(spacing: 8) {
+                Button(action: onUndo) {
+                    Image(systemName: "arrow.uturn.backward")
+                        .font(.system(size: platformValue(watch: 12, ios: 14), weight: .black, design: .rounded))
+                        .foregroundColor(.orange)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, platformValue(watch: 8, ios: 12))
+                        .background(Color.orange.opacity(0.15))
+                        .cornerRadius(10)
+                }
+                .buttonStyle(.plain)
+                
+                Button(action: onDismiss) {
+                    Text("DONE")
+                        .font(.system(size: platformValue(watch: 12, ios: 14), weight: .black, design: .rounded))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, platformValue(watch: 8, ios: 12))
+                        .background(Color.yellow.gradient)
+                        .cornerRadius(10)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
             .padding(.horizontal, 8)
             .padding(.bottom, platformValue(watch: 10, ios: 20))
         }
@@ -179,5 +193,5 @@ struct ScoreboardRow: View {
             SetResult(team1Games: 7, team2Games: 5),
             SetResult(team1Games: 6, team2Games: 2)
         ]
-    ), onDismiss: {})
+    ), onUndo: {}, onDismiss: {})
 }
