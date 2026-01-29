@@ -30,7 +30,7 @@ struct WatchScoringView: View {
                     // Main Scoring Area
                     HStack(spacing: 4) {
                         ScoreColumn(
-                            team: "T1",
+                            team: viewModel.state.team1.isEmpty ? "TEAM 1" : viewModel.state.team1,
                             score: viewModel.state.isTieBreak ? "\(viewModel.state.team1TieBreakPoints)" : viewModel.state.team1Score.rawValue,
                             isServing: viewModel.state.servingTeam == 1,
                             color: .green,
@@ -47,7 +47,7 @@ struct WatchScoringView: View {
                         }
                         
                         ScoreColumn(
-                            team: "T2",
+                            team: viewModel.state.team2.isEmpty ? "TEAM 2" : viewModel.state.team2,
                             score: viewModel.state.isTieBreak ? "\(viewModel.state.team2TieBreakPoints)" : viewModel.state.team2Score.rawValue,
                             isServing: viewModel.state.servingTeam == 2,
                             color: .blue,
@@ -57,26 +57,25 @@ struct WatchScoringView: View {
                     .frame(maxHeight: .infinity)
                     
                     // Footer Area: Games + Undo
-                    VStack(spacing: 8) { // Increased spacing from 4 to 8
+                    VStack(spacing: 4) {
                         Text(viewModel.state.isTieBreak ? "TIE BREAK" : "GAMES: \(viewModel.state.team1Games)-\(viewModel.state.team2Games)")
-                            .font(.system(size: 10, weight: .bold, design: .monospaced))
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
                             .foregroundColor(viewModel.state.isTieBreak ? .yellow : .secondary)
-                            .padding(.bottom, 2) // Extra nudge up
                         
                         Button(action: { viewModel.undoPoint() }) {
                             Image(systemName: "arrow.uturn.backward")
-                                .font(.system(size: 12, weight: .black))
+                                .font(.system(size: 11, weight: .black))
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 28)
+                                .frame(height: 24)
                                 .background(viewModel.canUndo ? Color.orange.opacity(0.2) : Color.white.opacity(0.05))
-                                .cornerRadius(14)
+                                .cornerRadius(12)
                                 .foregroundColor(viewModel.canUndo ? .orange : .secondary.opacity(0.3))
                         }
                         .buttonStyle(.plain)
                         .disabled(!viewModel.canUndo)
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 32)
                     }
-                    .padding(.bottom, 2)
+                    .padding(.bottom, 1)
                 }
                 .containerBackground(Color.black.gradient, for: .navigation)
                     .tag(0)
@@ -202,9 +201,12 @@ struct ScoreColumn: View {
                             .fill(Color.yellow)
                             .frame(width: 4, height: 4)
                     }
-                    Text(team.prefix(6))
-                        .font(.system(size: 7, weight: .black))
-                        .foregroundColor(isServing ? .yellow : .secondary.opacity(0.8))
+                    Text(team.uppercased())
+                        .font(.system(size: 11, weight: .black, design: .rounded))
+                        .foregroundColor(isServing ? .yellow : .white.opacity(0.8))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: 65)
                     if isServing {
                         Circle()
                             .fill(Color.yellow)

@@ -112,7 +112,12 @@ public class MatchViewModel {
     public func undoPoint() {
         guard !history.isEmpty else { return }
         let nextVersion = state.version + 1
+        let currentTeam1 = state.team1
+        let currentTeam2 = state.team2
+        
         state = history.removeLast()
+        state.team1 = currentTeam1
+        state.team2 = currentTeam2
         state.isMatchOver = false // Ensure match is not over after undoing the finish
         state.version = nextVersion
         

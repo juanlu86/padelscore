@@ -89,4 +89,23 @@ final class MatchViewModelTests: XCTestCase {
         XCTAssertEqual(mockSync.syncCount, 1)
         XCTAssertEqual(mockConnectivity.sendCount, 1)
     }
+
+    func testUndoDoesNotRevertTeamNames() {
+        // 1. Initial names
+        viewModel.updateTeamNames(team1: "A", team2: "B")
+        
+        // 2. Score a point (history snapshots "A" and "B")
+        viewModel.scorePoint(forTeam1: true)
+        
+        // 3. Edit names mid-match
+        viewModel.updateTeamNames(team1: "X", team2: "Y")
+        
+        // 4. Undo the point
+        viewModel.undoPoint()
+        
+        // 5. Verify names are still "X" and "Y", not reverted to "A" and "B"
+        XCTAssertEqual(viewModel.state.team1, "X")
+        XCTAssertEqual(viewModel.state.team2, "Y")
+        XCTAssertEqual(viewModel.state.team1Score, .zero) // Score was correctly undone
+    }
 }
