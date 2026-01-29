@@ -6,9 +6,9 @@ service cloud.firestore {
       // Allow anyone to read match data
       allow read: if true;
       
-      // Only authenticated users can create or update matches
-      // In a real app, you might check if they are the "owner" or an "admin"
-      allow create, update: if request.auth != null 
+      // In development, we allow unauthenticated writes to "test-match"
+      // In production, you should require request.auth != null
+      allow create, update: if (request.auth != null || matchId == 'test-match')
         && request.resource.data.team1 is string
         && request.resource.data.team2 is string;
         

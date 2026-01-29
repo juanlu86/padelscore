@@ -35,10 +35,21 @@ describe("Firestore Security Rules", () => {
         await assertSucceeds(unauthedDb.collection("matches").get());
     });
 
-    it("should deny write access to matches for unauthenticated users", async () => {
+    it("should deny write access to matches for unauthenticated users (except test-match)", async () => {
         const unauthedDb = testEnv.unauthenticatedContext().firestore();
         await assertFails(
             unauthedDb.collection("matches").add({
+                team1: "A",
+                team2: "B",
+                status: "live"
+            })
+        );
+    });
+
+    it("should allow unauthenticated write access to the specific test-match document", async () => {
+        const unauthedDb = testEnv.unauthenticatedContext().firestore();
+        await assertSucceeds(
+            unauthedDb.collection("matches").doc("test-match").set({
                 team1: "A",
                 team2: "B",
                 status: "live"
