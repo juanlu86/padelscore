@@ -4,6 +4,7 @@ import PadelCore
 struct MatchSettingsView: View {
     @Bindable var viewModel: MatchViewModel
     let onStart: () -> Void
+    var onClose: (() -> Void)? = nil
     
     var body: some View {
         ZStack {
@@ -42,13 +43,34 @@ struct MatchSettingsView: View {
             .tabViewStyle(.page(indexDisplayMode: .always))
             #else
             VStack(spacing: 32) { // Increased for iPhone too
-                Text("MATCH SETUP")
-                    .font(.system(size: 16, weight: .black, design: .rounded))
-                    .foregroundColor(.yellow)
-                    .padding(.top, 20)
+                HStack {
+                    if let onClose = onClose {
+                        Button(action: onClose) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.white.opacity(0.3))
+                        }
+                        .padding(.leading, 20)
+                    } else {
+                        Spacer().frame(width: 44)
+                    }
+                    
+                    Spacer()
+                    
+                    Text(viewModel.isMatchStarted ? "ADMIN SETTINGS" : "MATCH SETUP")
+                        .font(.system(size: 16, weight: .black, design: .rounded))
+                        .foregroundColor(.yellow)
+                    
+                    Spacer()
+                    
+                    Spacer().frame(width: 44)
+                }
+                .padding(.top, 20)
                 
                 pickerSection
                     .frame(height: 180)
+                
+                teamSection
                 
                 VStack(spacing: 24) { // Increased for iPhone
                     servingSection
@@ -111,6 +133,8 @@ struct MatchSettingsView: View {
                 .labelsHidden()
                 .tint(.yellow)
                 .scaleEffect(platformValue(watch: 0.9, ios: 1.0))
+                .disabled(viewModel.isMatchStarted)
+                .opacity(viewModel.isMatchStarted ? 0.5 : 1.0)
         }
     }
     
@@ -126,12 +150,48 @@ struct MatchSettingsView: View {
                 .labelsHidden()
                 .tint(.yellow)
                 .scaleEffect(platformValue(watch: 0.9, ios: 1.0))
+                .disabled(viewModel.isMatchStarted)
+                .opacity(viewModel.isMatchStarted ? 0.5 : 1.0)
         }
+    }
+    
+    private var teamSection: some View {
+        VStack(alignment: .leading, spacing: platformValue(watch: 8, ios: 12)) {
+            Text("TEAMS")
+                .font(.system(size: platformValue(watch: 8, ios: 12), weight: .black, design: .rounded))
+                .foregroundColor(.yellow)
+            
+            #if os(watchOS)
+            VStack(spacing: 4) {
+                teamTextField(placeholder: "T1", text: $viewModel.state.team1)
+                teamTextField(placeholder: "T2", text: $viewModel.state.team2)
+            }
+            #else
+            HStack(spacing: 12) {
+                teamTextField(placeholder: "TEAM 1", text: $viewModel.state.team1)
+                teamTextField(placeholder: "TEAM 2", text: $viewModel.state.team2)
+            }
+            #endif
+        }
+        .padding(.horizontal, platformValue(watch: 0, ios: 24))
+    }
+    
+    private func teamTextField(placeholder: String, text: Binding<String>) -> some View {
+        TextField(placeholder, text: text)
+            .font(.system(size: platformValue(watch: 10, ios: 14), weight: .bold, design: .rounded))
+            .padding(platformValue(watch: 6, ios: 12))
+            .background(Color.white.opacity(0.06))
+            .cornerRadius(platformValue(watch: 6, ios: 10))
+            .overlay(
+                RoundedRectangle(cornerRadius: platformValue(watch: 6, ios: 10))
+                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+            )
+            .submitLabel(.done)
     }
     
     private var startButton: some View {
         Button(action: onStart) {
-            Text("START MATCH")
+            Text(viewModel.isMatchStarted ? "SAVE CHANGES" : "START MATCH")
                 .font(.system(size: platformValue(watch: 13, ios: 16), weight: .black, design: .rounded))
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity)
@@ -170,6 +230,8 @@ struct MatchSettingsView: View {
             }
         }
         .frame(maxHeight: .infinity)
+        .disabled(viewModel.isMatchStarted)
+        .opacity(viewModel.isMatchStarted ? 0.6 : 1.0)
     }
     
     private func pickerRow(for system: ScoringSystem, in center: CGFloat) -> some View {

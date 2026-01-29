@@ -77,4 +77,16 @@ final class MatchViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.state.scoringSystem, .goldenPoint)
         XCTAssertEqual(viewModel.state.team1Sets, 0)
     }
+
+    func testUpdateTeamNamesIncrementsVersionAndSyncs() {
+        let originalVersion = viewModel.state.version
+        
+        viewModel.updateTeamNames(team1: "Galán/Lebrón", team2: "Coello/Tapia")
+        
+        XCTAssertEqual(viewModel.state.team1, "Galán/Lebrón")
+        XCTAssertEqual(viewModel.state.team2, "Coello/Tapia")
+        XCTAssertGreaterThan(viewModel.state.version, originalVersion)
+        XCTAssertEqual(mockSync.syncCount, 1)
+        XCTAssertEqual(mockConnectivity.sendCount, 1)
+    }
 }

@@ -3,10 +3,12 @@ import PadelCore
 
 struct iPhoneMatchView: View {
     @State var viewModel = MatchViewModel()
+    @State private var showingSettings = false
     private let haptics = UISelectionFeedbackGenerator()
     private let impact = UIImpactFeedbackGenerator(style: .medium)
     
     var body: some View {
+        @Bindable var viewModel = viewModel
         NavigationStack {
             ZStack {
                 // Background Gradient
@@ -23,7 +25,11 @@ struct iPhoneMatchView: View {
                 
                 VStack(spacing: 0) {
                     // PadelPro Header
-                    PadelProHeader(syncStatus: viewModel.syncStatus)
+                    PadelProHeader(syncStatus: viewModel.syncStatus) {
+                        withAnimation(.spring()) {
+                            showingSettings = true
+                        }
+                    }
                         .padding(.horizontal)
                         .padding(.top, 8)
                     
@@ -122,13 +128,23 @@ struct iPhoneMatchView: View {
             }
             
             // Settings Overlay
-            if !viewModel.isMatchStarted {
-                MatchSettingsView(viewModel: viewModel) {
+            if !viewModel.isMatchStarted || showingSettings {
+                MatchSettingsView(viewModel: viewModel, onStart: {
                     withAnimation(.spring()) {
                         impact.impactOccurred()
-                        viewModel.startMatch()
+                        if !viewModel.isMatchStarted {
+                            viewModel.startMatch()
+                        } else {
+                            // If mid-match, just save/sync names
+                            viewModel.updateTeamNames(team1: viewModel.state.team1, team2: viewModel.state.team2)
+                        }
+                        showingSettings = false
                     }
-                }
+                }, onClose: {
+                    withAnimation(.spring()) {
+                        showingSettings = false
+                    }
+                })
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .zIndex(1)
             }
@@ -173,6 +189,7 @@ struct iPhoneMatchView: View {
 
 struct PadelProHeader: View {
     let syncStatus: SyncService.Status
+    let onEdit: () -> Void
     
     var body: some View {
         HStack {
@@ -199,13 +216,16 @@ struct PadelProHeader: View {
             HStack(spacing: 12) {
                 syncBadge
                 
-                Text("COURT 1")
-                    .font(.system(size: 8, weight: .black))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(.white.opacity(0.05))
-                    .clipShape(Capsule())
-                    .foregroundColor(.yellow)
+                Button(action: onEdit) {
+                    Text("COURT 1")
+                        .font(.system(size: 8, weight: .black))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(.white.opacity(0.05))
+                        .clipShape(Capsule())
+                        .foregroundColor(.yellow)
+                }
+                .buttonStyle(.plain)
             }
         }
         .padding(.vertical, 12)

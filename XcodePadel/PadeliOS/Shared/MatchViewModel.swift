@@ -169,6 +169,17 @@ public class MatchViewModel {
         connectivity.send(state: state, isStarted: isMatchStarted)
     }
     
+    public func updateTeamNames(team1: String, team2: String) {
+        state.team1 = team1
+        state.team2 = team2
+        state.version += 1
+        
+        #if !os(watchOS)
+        sync.syncMatch(state: state)
+        #endif
+        connectivity.send(state: state, isStarted: isMatchStarted)
+    }
+    
     public var canUndo: Bool {
         return !history.isEmpty
     }
