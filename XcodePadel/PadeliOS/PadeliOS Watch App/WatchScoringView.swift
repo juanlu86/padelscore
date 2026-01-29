@@ -137,30 +137,53 @@ struct WatchScoringView: View {
 struct SpecialPointIndicator: View {
     let label: String
     @State private var pulseScale: CGFloat = 1.0
+    @State private var glowOpacity: Double = 0.3
     
     var body: some View {
         Text(label)
-            .font(.system(size: 10, weight: .black, design: .rounded))
-            .foregroundColor(.black)
-            .padding(.horizontal, 8)
+            .font(.system(size: 8, weight: .black, design: .rounded))
+            .tracking(1.5) // Premium character spacing
+            .foregroundColor(.white)
+            .padding(.horizontal, 10)
             .padding(.vertical, 4)
             .background {
-                Capsule()
-                    .fill(label.contains("STAR") ? 
-                          LinearGradient(colors: [.yellow, .orange], startPoint: .topLeading, endPoint: .bottomTrailing) :
-                          LinearGradient(colors: [.yellow, .white, .yellow], startPoint: .topLeading, endPoint: .bottomTrailing))
+                ZStack {
+                    // Pulsing Glow Aura behind the text
+                    Capsule()
+                        .fill(themeColor)
+                        .blur(radius: 8)
+                        .opacity(glowOpacity)
+                        .scaleEffect(pulseScale * 1.2)
+                    
+                    // Glassmorphism base (using ultraThinMaterial for integration)
+                    Capsule()
+                        .fill(.ultraThinMaterial)
+                    
+                    // Subtle glowing border
+                    Capsule()
+                        .strokeBorder(themeColor.opacity(0.6), lineWidth: 0.5)
+                }
             }
             .scaleEffect(pulseScale)
-            .shadow(color: .yellow.opacity(0.5), radius: 10)
             .onAppear {
-                withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
-                    pulseScale = 1.1
+                // Slower, more elegant pulse for premium feel
+                withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
+                    pulseScale = 1.06
+                    glowOpacity = 0.6
                 }
             }
             .onDisappear {
                 pulseScale = 1.0
+                glowOpacity = 0.3
             }
-            .transition(.asymmetric(insertion: .move(edge: .top).combined(with: .opacity), removal: .opacity))
+            .transition(.asymmetric(
+                insertion: .move(edge: .top).combined(with: .opacity).combined(with: .scale(scale: 0.8)),
+                removal: .opacity.combined(with: .scale(scale: 0.5))
+            ))
+    }
+    
+    private var themeColor: Color {
+        label.contains("STAR") ? .orange : .yellow
     }
 }
 
