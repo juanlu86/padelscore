@@ -138,6 +138,43 @@ final class MatchViewModelTests: XCTestCase {
         XCTAssertEqual(mockSync.syncCount, 2) // One for linking, one for scoring
     }
 
+    func testRemoteUpdateTriggersSync() async throws {
+        // 1. Setup - Link to a court
+        let courtId = "COURT-SYNC-TEST"
+        await MainActor.run {
+            viewModel.linkedCourtId = courtId
+        }
+        
+        let initialSyncCount = mockSync.syncCount
+        
+        // 2. Simulate receiving a remote update (higher version)
+        var newState = MatchState()
+        newState.team1Score = .fifteen // Changed from love
+        newState.version = 100 // Higher version
+        
+        print("Test: Simulate receiving remote state")
+        mockConnectivity.receivedIsStarted = true
+        mockConnectivity.receivedState = newState
+        
+        // 3. Wait for Combine pipeline (receive(on: .main))
+        try await Task.sleep(nanoseconds: 200_000_000) // 0.2s
+        
+        // 4. Verify local state updated
+        XCTAssertEqual(viewModel.state.team1Score, .fifteen, "Local state should update from remote")
+        
+        // 5. Verify sync called
+        // We expect syncCount to increment by 1
+        let finalSyncCount = mockSync.syncCount
+        XCTAssertGreaterThan(finalSyncCount, initialSyncCount, "Valid remote update should trigger syncMatch")
+        
+        if let lastSynced = mockSync.lastSyncedState {
+             XCTAssertEqual(lastSynced.team1Score, .fifteen, "Should sync the NEW state received from remote")
+             XCTAssertEqual(mockSync.lastSyncedCourtId, courtId, "Should sync to the correct court ID")
+        } else {
+            XCTFail("lastSyncedState is nil")
+        }
+    }
+
     @MainActor
     func testUnlinkCurrentCourtClearsRemoteAndLocal() async {
         // 1. Setup linked state

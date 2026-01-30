@@ -6,13 +6,23 @@ public struct QRScannerView: UIViewControllerRepresentable {
     public var onResult: (String) -> Void
     public var onCancel: () -> Void
 
-    public func makeUIViewController(context: Context) -> ScannerViewController {
+    public init(onResult: @escaping (String) -> Void, onCancel: @escaping () -> Void) {
+        self.onResult = onResult
+        self.onCancel = onCancel
+    }
+
+    public func makeUIViewController(context: Context) -> UIViewController {
+        #if targetEnvironment(simulator)
+        let controller = UIHostingController(rootView: SimulatorQRView(onResult: onResult, onCancel: onCancel))
+        return controller
+        #else
         let controller = ScannerViewController()
         controller.delegate = context.coordinator
         return controller
+        #endif
     }
 
-    public func updateUIViewController(_ uiViewController: ScannerViewController, context: Context) {}
+    public func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 
     public func makeCoordinator() -> Coordinator {
         Coordinator(onResult: onResult)
@@ -30,6 +40,53 @@ public struct QRScannerView: UIViewControllerRepresentable {
         }
     }
 }
+
+#if targetEnvironment(simulator)
+struct SimulatorQRView: View {
+    var onResult: (String) -> Void
+    var onCancel: () -> Void
+    @State private var courtId: String = "SIM-COURT-001"
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Simulator QR Scanner")
+                .font(.title)
+                .fontWeight(.bold)
+            
+            Text("Camera is not available in Simulator.\nEnter a Court ID manually to simulate a scan.")
+                .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
+                .padding()
+            
+            TextField("Court ID", text: $courtId)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.horizontal)
+                .autocapitalization(.allCharacters)
+            
+            Button(action: {
+                // Simulate the real QR code format by adding the prefix if missing
+                let rawId = courtId.trimmingCharacters(in: .whitespacesAndNewlines)
+                let payload = rawId.hasPrefix("padelscore:link:") ? rawId : "padelscore:link:\(rawId)"
+                onResult(payload)
+            }) {
+                Text("Simulate Scan")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue)
+                    .cornerRadius(10)
+            }
+            .padding(.horizontal)
+            
+            Button("Cancel", action: onCancel)
+                .padding()
+        }
+        .padding()
+        .background(Color(UIColor.systemBackground))
+    }
+}
+#endif
 
 public protocol ScannerViewControllerDelegate: AnyObject {
     func didFindCode(_ code: String)

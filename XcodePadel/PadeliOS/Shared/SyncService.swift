@@ -41,9 +41,21 @@ public class SyncService: ObservableObject, SyncProvider {
         self.syncProvider = provider
     }
     
+    private var pendingUpdate: (MatchState, String?)?
+    
     /// Syncs the match state to Firestore
     public func syncMatch(state: MatchState, courtId: String?) {
-        guard status != .syncing else { return }
+        // If we are already syncing, queue this update as the "latest intent"
+        if status == .syncing {
+            print("⏳ Sync in progress. Queuing update for v\(state.version)")
+            pendingUpdate = (state, courtId)
+            return
+        }
+        
+        performSync(state: state, courtId: courtId)
+    }
+    
+    private func performSync(state: MatchState, courtId: String?) {
         status = .syncing
         
         Task {
@@ -58,12 +70,32 @@ public class SyncService: ObservableObject, SyncProvider {
                     // Legacy sync for testing
                     try await self.syncProvider.setData(data, collection: "matches", document: "test-match")
                 }
-                self.status = .synced
                 print("✅ Match synced to \(path)")
+                
+                // Sync finished successfully. Check if there's a pending update.
+                self.processPendingUpdate()
+                
             } catch {
                 self.status = .failed(error.localizedDescription)
                 print("❌ Sync error: \(error.localizedDescription)")
+                
+                // Even on error, we should probably try to sync the latest pending state
+                // to eventually reach consistency.
+                self.processPendingUpdate()
             }
+        }
+    }
+    
+    private func processPendingUpdate() {
+        if let pending = pendingUpdate {
+            print("🔄 Found pending update (v\(pending.0.version)). Triggering next sync.")
+            let (state, courtId) = pending
+            pendingUpdate = nil
+            // Recursively call performSync (not syncMatch, to avoid re-queuing logic if we want to force start)
+            // But actually performSync sets status=.syncing immediately, so it's fine.
+            performSync(state: state, courtId: courtId)
+        } else {
+            status = .synced
         }
     }
     
