@@ -88,20 +88,17 @@ Every incremental change must follow this cycle:
     - Firestore `/courts` schema and security rules (development version).
     - Next.js Admin Panel with Court CRUD and inline name editing.
     - Dynamic Court Dashboard for real-time spectator scoring.
-- **Phase 2: iOS Court Linking**
-    - Native iPhone QR Scanner and 6-digit Manual Code pairing.
-    - Persistent Court ID storage on iOS device.
-    - Targeted `SyncService` routing match data to specific court documents.
-    - Full TDD verification of linking and targeted sync logic.
-- **Bug Fixes & Polish**
-    - Fixed Admin Page crash due to undefined court names in Firestore.
-    - Standardized `syncMatch` protocol across iOS and Watch apps.
+- **Phase 2: iOS/Watch Integration & Sync Stability**
+    - Native iPhone QR Scanner and pairing logic with **Simulator Support**.
+    - **Sync Stability**: Implemented "Pending Update Queue" in `SyncService` to prevent Watch-to-Web data loss.
+    - **Test Hardening**: Resolved async race conditions in `MatchViewModelTests`.
+    - Duplicate file cleanup (Removed shadowed `QRScannerView.swift`).
 
 ### ⏳ Pending
-- **Phase 3: Verification & Polish**
-    - [ ] Verify Managed-Only mode (Syncing to TV Dashboard without Watch latency).
-    - [ ] Verify Local-Only mode (Watch/iPhone match without backend sync).
+- **Phase 3: Security & Verification**
     - [ ] Implement Production-ready (hardened) Firestore Rules.
     - [ ] Admin Panel Authentication (secure access to manager features).
-    - [ ] Full regression testing of HealthKit and special scoring systems (Star Point, etc.).
+    - [ ] Verify Managed-Only mode (Syncing without Watch latency).
+    - [ ] Verify Local-Only mode (Match without backend sync).
+    - [ ] Full regression testing of HealthKit and special scoring systems.
 
