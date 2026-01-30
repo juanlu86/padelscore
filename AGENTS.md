@@ -63,6 +63,12 @@ A unified Padel scoring ecosystem. The **Apple Watch** is the primary input, the
 
 ---
 
+## 🛑 Review Gate Protocol (MANDATORY)
+- **Rule**: Every implementation plan must be presented to the user BEFORE any code is written or terminal commands are executed.
+- **Wait for Approval**: The agent must explicitly wait until the implementation plan is reviewed and approved by the user.
+
+---
+
 ## 🚀 Initial Boot Sequence
 1. [COMPLETED] **Task 1**: Scaffold `PadelCore` with initial unit tests. Run the tests.
 2. [COMPLETED] **Task 2**: If tests pass, initialize Firebase (Standard Hosting) and Cloud Functions.
