@@ -8,14 +8,20 @@ final class MockFirestore: FirestoreSyncable {
     var shouldFail = false
     var lastData: [String: Any]?
     
-    func setData(_ data: [String: Any], forDocument path: String) async throws {
+    var lastCollection: String?
+    var lastDocument: String?
+    
+    func setData(_ data: [String: Any], collection: String, document: String) async throws {
         if shouldFail {
             throw NSError(domain: "SyncError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Network unreachable"])
         }
         lastData = data
+        lastCollection = collection
+        lastDocument = document
     }
 }
 
+@MainActor
 final class SyncServiceTests: XCTestCase {
     
     func testMapToFirestoreCorrectlyMapsNormalScore() {
@@ -53,14 +59,15 @@ final class SyncServiceTests: XCTestCase {
         // Use an expectation to wait for the @MainActor task
         let expectation = XCTestExpectation(description: "Sync finishes")
         
-        service.syncMatch(state: state)
+        await service.syncMatch(state: state, courtId: nil)
         
         // Since syncMatch uses Task { @MainActor in ... }, we should be able to check 
         // the status after a small delay or by using a continuation.
         // For simplicity in this test, we'll just wait a bit.
         try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
         
-        XCTAssertEqual(service.status, .synced)
+        let status = service.status
+        XCTAssertEqual(status, .synced)
         XCTAssertNotNil(mock.lastData)
     }
     
@@ -70,15 +77,38 @@ final class SyncServiceTests: XCTestCase {
         let service = SyncService(provider: mock)
         let state = MatchState()
         
-        service.syncMatch(state: state)
+        service.syncMatch(state: state, courtId: nil)
         
         try? await Task.sleep(nanoseconds: 100_000_000)
         
-        if case .failed(let message) = service.status {
+        // Wait and check
+        if case .failed(_) = service.status {
+            // success
+        } else {
+             try? await Task.sleep(nanoseconds: 200_000_000)
+        }
+        
+        let status = service.status
+        if case .failed(let message) = status {
             XCTAssertEqual(message, "Network unreachable")
         } else {
-            XCTFail("Status should be failed, but was \(service.status)")
+            XCTFail("Status should be failed, but was \(status)")
         }
+    }
+    
+    func testSyncMatchWithCourtIdTargetsCourtsCollection() async {
+        let mock = MockFirestore()
+        let service = SyncService(provider: mock)
+        let state = MatchState()
+        let courtId = "test-court-123"
+        
+        service.syncMatch(state: state, courtId: courtId)
+        
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        
+        XCTAssertEqual(mock.lastCollection, "courts")
+        XCTAssertEqual(mock.lastDocument, courtId)
+        XCTAssertNotNil(mock.lastData?["liveMatch"])
     }
 }
 #endif

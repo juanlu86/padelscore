@@ -25,7 +25,10 @@ struct iPhoneMatchView: View {
                 
                 VStack(spacing: 0) {
                     // PadelPro Header
-                    PadelProHeader(syncStatus: viewModel.syncStatus) {
+                    PadelProHeader(
+                        syncStatus: viewModel.syncStatus,
+                        linkedCourtId: viewModel.linkedCourtId
+                    ) {
                         withAnimation(.spring()) {
                             showingSettings = true
                         }
@@ -189,6 +192,7 @@ struct iPhoneMatchView: View {
 
 struct PadelProHeader: View {
     let syncStatus: SyncService.Status
+    let linkedCourtId: String
     let onEdit: () -> Void
     
     var body: some View {
@@ -217,7 +221,7 @@ struct PadelProHeader: View {
                 syncBadge
                 
                 Button(action: onEdit) {
-                    Text("COURT 1")
+                    Text(!linkedCourtId.isEmpty ? "COURT \(linkedCourtId)" : "LOCAL MATCH")
                         .font(.system(size: 8, weight: .black))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)

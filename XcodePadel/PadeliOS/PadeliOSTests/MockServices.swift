@@ -1,4 +1,5 @@
 import Foundation
+import XCTest
 import Combine
 import PadelCore
 @testable import PadeliOS
@@ -33,12 +34,30 @@ public class MockSyncProvider: SyncProvider {
         $status.eraseToAnyPublisher()
     }
     
+    public var lastSyncedCourtId: String?
     public var lastSyncedState: MatchState?
     public var syncCount = 0
     
-    public func syncMatch(state: MatchState) {
+    public func syncMatch(state: MatchState, courtId: String? = nil) {
+        print("TestMock: syncMatch called for \(String(describing: courtId))")
         lastSyncedState = state
+        lastSyncedCourtId = courtId
         syncCount += 1
         status = .synced
+    }
+    
+    public func syncMatchAsync(state: MatchState, courtId: String?) async throws {
+        syncMatch(state: state, courtId: courtId)
+    }
+    
+    public var unlinkedCourtId: String?
+    public var unlinkExpectation: XCTestExpectation?
+    
+    public func unlinkMatch(courtId: String) async {
+        print("TestMock: unlinkMatch called for \(courtId)")
+        lastSyncedCourtId = nil
+        unlinkedCourtId = courtId
+        syncCount += 1
+        unlinkExpectation?.fulfill()
     }
 }

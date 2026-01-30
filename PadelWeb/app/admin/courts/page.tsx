@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { db } from '../../../lib/firebase';
-import { collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, setDoc, serverTimestamp, deleteField } from 'firebase/firestore';
 import { Court } from '../../../types/court';
 
 export default function AdminCourts() {
@@ -29,7 +29,8 @@ export default function AdminCourts() {
         if (!newCourtName.trim()) return;
 
         try {
-            await addDoc(collection(db, 'courts'), {
+            const shortId = Array.from({ length: 6 }, () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".charAt(Math.floor(Math.random() * 36))).join("");
+            await setDoc(doc(db, 'courts', shortId), {
                 name: newCourtName,
                 isActive: true,
                 updatedAt: serverTimestamp()
@@ -37,6 +38,17 @@ export default function AdminCourts() {
             setNewCourtName('');
         } catch (error) {
             console.error("Error adding court: ", error);
+        }
+    };
+    const resetCourt = async (id: string) => {
+        if (!confirm('Are you sure you want to reset this court? This will unlink players and clear the match.')) return;
+        try {
+            await updateDoc(doc(db, 'courts', id), {
+                liveMatch: deleteField(),
+                updatedAt: serverTimestamp()
+            });
+        } catch (error) {
+            console.error("Error resetting court: ", error);
         }
     };
 
@@ -118,7 +130,7 @@ export default function AdminCourts() {
                             <div key={court.id} className="glass p-6 rounded-2xl border border-white/5 flex justify-between items-center group hover:border-white/10 transition-all">
                                 <div className="flex items-center gap-6">
                                     <div className="w-12 h-12 bg-padel-yellow/10 rounded-xl flex items-center justify-center border border-padel-yellow/20">
-                                        <span className="text-padel-yellow font-black text-xl italic">{court.name.charAt(0)}</span>
+                                        <span className="text-padel-yellow font-black text-xl italic">{(court.name || 'C').charAt(0)}</span>
                                     </div>
                                     <div>
                                         {editingCourtId === court.id ? (
@@ -152,7 +164,7 @@ export default function AdminCourts() {
                                                 </button>
                                             </div>
                                         ) : (
-                                            <h3 className="text-white font-black text-lg uppercase italic tracking-tight">{court.name}</h3>
+                                            <h3 className="text-white font-black text-lg uppercase italic tracking-tight">{court.name || 'Unnamed Court'}</h3>
                                         )}
                                         <div className="flex items-center gap-3 mt-1">
                                             <code className="text-[10px] bg-white/5 px-2 py-0.5 rounded text-zinc-400 font-mono">ID: {court.id}</code>
@@ -170,11 +182,17 @@ export default function AdminCourts() {
                                             <button
                                                 onClick={() => {
                                                     setEditingCourtId(court.id);
-                                                    setEditingName(court.name);
+                                                    setEditingName(court.name || '');
                                                 }}
                                                 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest hover:text-padel-yellow transition-colors border border-white/10 px-4 py-2 rounded-lg"
                                             >
                                                 Edit
+                                            </button>
+                                            <button
+                                                onClick={() => resetCourt(court.id)}
+                                                className="text-[10px] font-black text-red-400/70 uppercase tracking-widest hover:text-red-400 transition-colors border border-red-500/10 px-4 py-2 rounded-lg"
+                                            >
+                                                Reset Match
                                             </button>
                                             <a
                                                 href={`/court/${court.id}`}

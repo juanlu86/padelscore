@@ -120,10 +120,6 @@ public class ConnectivityService: NSObject, ObservableObject, WCSessionDelegate,
                 self.receivedState = state
                 self.receivedIsStarted = isStarted
                 print("📩 Received state update (Started: \(isStarted)) via \(WCSession.isSupported() ? "WCSession" : "Unknown")")
-                
-                #if !os(watchOS)
-                SyncService.shared.syncMatch(state: state)
-                #endif
             }
         } catch {
             print("❌ Failed to decode received match state: \(error.localizedDescription)")

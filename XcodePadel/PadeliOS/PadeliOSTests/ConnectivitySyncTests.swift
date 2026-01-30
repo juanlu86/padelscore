@@ -29,7 +29,7 @@ final class ConnectivitySyncTests: XCTestCase {
         XCTAssertEqual(viewModel.state.team1Score, .fifteen, "State should not have updated with stale version")
     }
     
-    func testNewerVersionIsAccepted() {
+    func testNewerVersionIsAccepted() async throws {
         let initialState = MatchState(team1Score: .fifteen, version: 10)
         viewModel.state = initialState
         
@@ -37,16 +37,22 @@ final class ConnectivitySyncTests: XCTestCase {
         mockConnectivity.receivedState = newState
         mockConnectivity.receivedIsStarted = true
         
+        // Wait for Combine receive(on: .main)
+        try await Task.sleep(nanoseconds: 100_000_000)
+        
         XCTAssertEqual(viewModel.state.team1Score, .forty, "State should have updated with newer version")
     }
     
-    func testRemoteUpdatePopulatesHistory() {
+    func testRemoteUpdatePopulatesHistory() async throws {
         let initialState = MatchState(team1Score: .fifteen, version: 10)
         viewModel.state = initialState
         
         let newState = MatchState(team1Score: .thirty, version: 11)
         mockConnectivity.receivedState = newState
         mockConnectivity.receivedIsStarted = true
+        
+        // Wait for Combine receive(on: .main)
+        try await Task.sleep(nanoseconds: 100_000_000)
         
         // Verify we can undo the remote point
         XCTAssertTrue(viewModel.canUndo, "Remote update should have populated history")

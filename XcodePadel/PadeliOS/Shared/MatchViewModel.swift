@@ -2,13 +2,48 @@ import SwiftUI
 import Observation
 import Combine
 import PadelCore
+#if !os(watchOS)
+import FirebaseFirestore
+#endif
 
 @Observable
 public class MatchViewModel {
     public var state: MatchState
     public var isMatchStarted: Bool = false
+    public var linkedCourtId: String = "" {
+        didSet {
+            let normalized = linkedCourtId.uppercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            if normalized != linkedCourtId {
+                linkedCourtId = normalized
+                return
+            }
+            UserDefaults.standard.set(normalized, forKey: "linkedCourtId")
+            
+            #if !os(watchOS)
+            if !normalized.isEmpty {
+                // RACE CONDITION FIX:
+                // We must write the data FIRST before listening, otherwise the listener might
+                // see an empty "liveMatch" (from before our write) and immediately unlink us.
+                Task { @MainActor in
+                    do {
+                        try await sync.syncMatchAsync(state: state, courtId: normalized)
+                        setupCourtListener(id: normalized)
+                    } catch {
+                        print("⚠️ Failed to perform initial sync for court \(normalized): \(error.localizedDescription)")
+                        // Attempt to listen anyway, in case it was a transient network error
+                        setupCourtListener(id: normalized)
+                    }
+                }
+            } else {
+                stopCourtListener()
+            }
+            #endif
+        }
+    }
+    
     #if !os(watchOS)
     public var syncStatus: SyncService.Status = .idle
+    private var courtListener: ListenerRegistration?
     #endif
     
     // MARK: - Display Properties
@@ -61,6 +96,9 @@ public class MatchViewModel {
         #if !os(watchOS)
         self.sync = sync ?? SyncService.shared
         
+        // Load initial state
+        self.linkedCourtId = UserDefaults.standard.string(forKey: "linkedCourtId") ?? ""
+        
         // Listen for sync status updates
         self.sync.statusPublisher
             .receive(on: DispatchQueue.main)
@@ -68,6 +106,10 @@ public class MatchViewModel {
                 self?.syncStatus = status
             }
             .store(in: &cancellables)
+            
+        if !linkedCourtId.isEmpty {
+            setupCourtListener(id: linkedCourtId)
+        }
         #endif
         
         // Listen for updates from the other device
@@ -89,7 +131,8 @@ public class MatchViewModel {
         isMatchStarted = true
         state.version += 1
         #if !os(watchOS)
-        sync.syncMatch(state: state)
+        let courtId = linkedCourtId.isEmpty ? nil : linkedCourtId
+        sync.syncMatch(state: state, courtId: courtId)
         #else
         workoutManager.requestAuthorization()
         workoutManager.startWorkout()
@@ -104,7 +147,8 @@ public class MatchViewModel {
         history.append(state)
         state = logic.scorePoint(forTeam1: forTeam1, currentState: state)
         #if !os(watchOS)
-        sync.syncMatch(state: state)
+        let courtId = linkedCourtId.isEmpty ? nil : linkedCourtId
+        sync.syncMatch(state: state, courtId: courtId)
         #endif
         connectivity.send(state: state, isStarted: isMatchStarted)
     }
@@ -122,7 +166,8 @@ public class MatchViewModel {
         state.version = nextVersion
         
         #if !os(watchOS)
-        sync.syncMatch(state: state)
+        let courtId = linkedCourtId.isEmpty ? nil : linkedCourtId
+        sync.syncMatch(state: state, courtId: courtId)
         #endif
         connectivity.send(state: state, isStarted: isMatchStarted)
     }
@@ -148,7 +193,8 @@ public class MatchViewModel {
         state.isMatchOver = true
         state.version += 1
         #if !os(watchOS)
-        sync.syncMatch(state: state)
+        let courtId = linkedCourtId.isEmpty ? nil : linkedCourtId
+        sync.syncMatch(state: state, courtId: courtId)
         #else
         workoutManager.endWorkout()
         #endif
@@ -167,7 +213,8 @@ public class MatchViewModel {
         state = newState
         isMatchStarted = false
         #if !os(watchOS)
-        sync.syncMatch(state: state)
+        let courtId = linkedCourtId.isEmpty ? nil : linkedCourtId
+        sync.syncMatch(state: state, courtId: courtId)
         #else
         workoutManager.endWorkout()
         #endif
@@ -180,13 +227,31 @@ public class MatchViewModel {
         state.version += 1
         
         #if !os(watchOS)
-        sync.syncMatch(state: state)
+        let courtId = linkedCourtId.isEmpty ? nil : linkedCourtId
+        sync.syncMatch(state: state, courtId: courtId)
         #endif
         connectivity.send(state: state, isStarted: isMatchStarted)
     }
     
     public var canUndo: Bool {
         return !history.isEmpty
+    }
+    
+    public func unlinkCurrentCourt() async {
+        #if !os(watchOS)
+        let courtId = linkedCourtId
+        NSLog("ViewModel: unlinkCurrentCourt called with courtId: '%@'", courtId)
+        guard !courtId.isEmpty else { return }
+        
+        // 1. Clear local link immediately for UI responsiveness
+        await MainActor.run {
+            self.linkedCourtId = ""
+        }
+        
+        // 2. Tell backend to clear the match from the court
+        NSLog("ViewModel: calling sync.unlinkMatch for %@", courtId)
+        await sync.unlinkMatch(courtId: courtId)
+        #endif
     }
 }
 
@@ -210,8 +275,44 @@ private extension MatchViewModel {
             self.state = newState
             self.isMatchStarted = isStarted
         }
+        
+        #if !os(watchOS)
+        // Gateway: Sync the received remote state to Firestore using our linked court ID
+        let courtId = linkedCourtId.isEmpty ? nil : linkedCourtId
+        sync.syncMatch(state: state, courtId: courtId)
+        #endif
     }
 }
+
+// MARK: - Remote Unlinking
+#if !os(watchOS)
+private extension MatchViewModel {
+    func setupCourtListener(id: String) {
+        stopCourtListener()
+        
+        print("📡 Starting remote listener for court: \(id)")
+        courtListener = Firestore.firestore().collection("courts").document(id)
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self, let snapshot = snapshot else { return }
+                
+                // If the court's liveMatch is null or field is missing, it was reset by admin
+                if snapshot.exists && snapshot.data()?["liveMatch"] == nil {
+                    print("🚫 Court \(id) was reset/cleared by admin. Unlinking local device.")
+                    Task { @MainActor in
+                        withAnimation(.spring()) {
+                            self.linkedCourtId = ""
+                        }
+                    }
+                }
+            }
+    }
+    
+    func stopCourtListener() {
+        courtListener?.remove()
+        courtListener = nil
+    }
+}
+#endif
 
 // MARK: - Protocols
 
@@ -229,6 +330,8 @@ public protocol SyncProvider: AnyObject {
     #if !os(watchOS)
     var status: SyncService.Status { get }
     var statusPublisher: AnyPublisher<SyncService.Status, Never> { get }
-    func syncMatch(state: MatchState)
+    func syncMatch(state: MatchState, courtId: String?)
+    func syncMatchAsync(state: MatchState, courtId: String?) async throws
+    func unlinkMatch(courtId: String) async
     #endif
 }

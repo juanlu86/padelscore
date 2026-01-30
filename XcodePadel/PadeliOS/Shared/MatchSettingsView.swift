@@ -6,6 +6,9 @@ struct MatchSettingsView: View {
     let onStart: () -> Void
     var onClose: (() -> Void)? = nil
     
+    @State private var showingScanner = false
+    @State private var manualCodeLocal = ""
+    
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
@@ -63,7 +66,16 @@ struct MatchSettingsView: View {
                     
                     Spacer()
                     
+                    #if !os(watchOS)
+                    Button(action: { showingScanner = true }) {
+                        Image(systemName: "qrcode.viewfinder")
+                            .font(.system(size: 20))
+                            .foregroundColor(.yellow)
+                    }
+                    .padding(.trailing, 20)
+                    #else
                     Spacer().frame(width: 44)
+                    #endif
                 }
                 .padding(.top, 20)
                 
@@ -71,6 +83,10 @@ struct MatchSettingsView: View {
                     .frame(height: 180)
                 
                 teamSection
+                
+                #if !os(watchOS)
+                courtConnectionSection
+                #endif
                 
                 VStack(spacing: 24) { // Increased for iPhone
                     servingSection
@@ -80,6 +96,19 @@ struct MatchSettingsView: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 30)
+            }
+            .sheet(isPresented: $showingScanner) {
+                #if !os(watchOS)
+                QRScannerView { result in
+                    if result.hasPrefix("padelscore:link:") {
+                        let id = result.replacingOccurrences(of: "padelscore:link:", with: "")
+                        viewModel.linkedCourtId = id
+                        showingScanner = false
+                    }
+                } onCancel: {
+                    showingScanner = false
+                }
+                #endif
             }
             #endif
         }
@@ -273,6 +302,89 @@ struct MatchSettingsView: View {
         return text
         #endif
     }
+
+    #if !os(watchOS)
+    private var courtConnectionSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("CLOUD DASHBOARD")
+                .font(.system(size: 12, weight: .black, design: .rounded))
+                .foregroundColor(.yellow)
+            
+            VStack(spacing: 12) {
+                if !viewModel.linkedCourtId.isEmpty {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("LINKED TO COURT")
+                                .font(.system(size: 10, weight: .black, design: .rounded))
+                                .foregroundColor(.white.opacity(0.4))
+                            Text(viewModel.linkedCourtId.uppercased())
+                                .font(.system(size: 14, weight: .black, design: .rounded))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                        }
+                        Spacer()
+                        Button(action: { 
+                            Task {
+                                await viewModel.unlinkCurrentCourt()
+                            }
+                        }) {
+                            Image(systemName: "link.badge.plus")
+                                .font(.system(size: 20))
+                                .foregroundColor(.red.opacity(0.7))
+                        }
+                    }
+                    .padding(16)
+                    .background(Color.white.opacity(0.06))
+                    .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.yellow.opacity(0.3), lineWidth: 1)
+                    )
+                } else {
+                    HStack(spacing: 12) {
+                        Button(action: { showingScanner = true }) {
+                            VStack(spacing: 6) {
+                                Image(systemName: "qrcode.viewfinder")
+                                    .font(.system(size: 24))
+                                Text("SCAN TO PAIR")
+                                    .font(.system(size: 10, weight: .black, design: .rounded))
+                            }
+                            .frame(width: 100, height: 80)
+                            .background(Color.yellow)
+                            .foregroundColor(.black)
+                            .cornerRadius(16)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("OR ENTER 6-DIGIT CODE")
+                                .font(.system(size: 10, weight: .black, design: .rounded))
+                                .foregroundColor(.white.opacity(0.4))
+                            
+                            HStack {
+                                TextField("ABC-123", text: $manualCodeLocal)
+                                    .font(.system(size: 16, weight: .black, design: .monospaced))
+                                    .padding(12)
+                                    .background(Color.white.opacity(0.06))
+                                    .cornerRadius(12)
+                                    .submitLabel(.done)
+                                    .onChange(of: manualCodeLocal) { oldValue, newValue in
+                                        let filtered = String(newValue.uppercased().prefix(6))
+                                        if filtered != newValue {
+                                            manualCodeLocal = filtered
+                                        }
+                                        if filtered.count == 6 {
+                                            viewModel.linkedCourtId = filtered
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 24)
+    }
+    #endif
     
     private func systemDescription(for system: ScoringSystem) -> String {
         switch system {

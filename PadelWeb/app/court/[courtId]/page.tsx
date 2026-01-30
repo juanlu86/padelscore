@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { useCourtMatch } from '../../../hooks/useCourtMatch';
 import { isMatchFinished, calculateSetsWon } from '../../../lib/matchUtils';
 import ScoreBoard from '../../../components/ScoreBoard';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function CourtDashboard() {
     const params = useParams();
@@ -15,7 +16,7 @@ export default function CourtDashboard() {
             <div className="flex min-h-screen items-center justify-center p-6 bg-background text-foreground font-sans">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-12 h-12 border-4 border-padel-yellow border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-zinc-500 animate-pulse font-medium tracking-wide italic">CONNECTING TO COURT...</p>
+                    <p className="text-zinc-500 animate-pulse font-medium tracking-wide italic text-sm">CONNECTING TO COURT...</p>
                 </div>
             </div>
         );
@@ -25,14 +26,34 @@ export default function CourtDashboard() {
         return (
             <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-background text-foreground font-sans relative overflow-hidden">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(234,255,0,0.05)_0%,transparent_70%)]"></div>
+
                 <div className="glass p-12 rounded-[2.5rem] border border-white/5 shadow-2xl text-center max-w-lg w-full relative z-10">
-                    <div className="w-20 h-20 bg-padel-yellow/10 rounded-3xl flex items-center justify-center border border-padel-yellow/20 mx-auto mb-8 animate-pulse">
-                        <span className="text-padel-yellow font-black text-3xl italic">!</span>
+                    <h1 className="text-3xl font-black text-white italic uppercase tracking-tight mb-2 leading-none">{courtName || 'COURT'}</h1>
+                    <p className="text-padel-yellow font-black uppercase tracking-[0.2em] text-[10px] mb-10">Facility Management Pro</p>
+
+                    <div className="bg-white/5 border border-white/5 p-8 rounded-[2rem] mb-10 flex flex-col items-center">
+                        <div className="bg-white p-4 rounded-3xl mb-6 shadow-[0_0_50px_rgba(255,255,255,0.1)]">
+                            <QRCodeSVG
+                                value={`padelscore:link:${courtId}`}
+                                size={180}
+                                level="H"
+                                includeMargin={false}
+                            />
+                        </div>
+                        <p className="text-zinc-400 font-bold uppercase tracking-widest text-[10px] mb-2">Scan to Start Match</p>
+                        <div className="flex items-center gap-4 w-full">
+                            <div className="h-[1px] flex-1 bg-white/5"></div>
+                            <span className="text-[10px] font-black text-zinc-600 uppercase italic">Or enter code</span>
+                            <div className="h-[1px] flex-1 bg-white/5"></div>
+                        </div>
+                        <p className="mt-4 text-2xl font-black text-white tracking-[0.3em] font-mono bg-white/5 px-6 py-2 rounded-xl border border-white/5">
+                            {courtId.toUpperCase()}
+                        </p>
                     </div>
-                    <h1 className="text-2xl font-black text-white italic uppercase tracking-tight mb-3">{courtName || 'COURT'}</h1>
-                    <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs mb-8">Ready for next match</p>
-                    <div className="bg-white/5 border border-white/5 py-4 px-6 rounded-2xl">
-                        <p className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em]">Scan QR on Net to Start</p>
+
+                    <div className="flex items-center justify-center gap-3 text-zinc-500 font-bold uppercase tracking-widest text-[10px]">
+                        <span className="w-2 h-2 rounded-full bg-padel-yellow/50 animate-pulse"></span>
+                        Waiting for players...
                     </div>
                 </div>
             </div>

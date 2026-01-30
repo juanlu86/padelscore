@@ -7,18 +7,19 @@ import FirebaseFirestore
 
 /// Protocol to allow mocking Firestore for tests
 public protocol FirestoreSyncable {
-    func setData(_ data: [String: Any], forDocument path: String) async throws
+    func setData(_ data: [String: Any], collection: String, document: String) async throws
 }
 
 /// Production implementation of Firestore sync
 public class ProductionFirestore: FirestoreSyncable {
-    private let db = Firestore.firestore()
     public init() {}
-    public func setData(_ data: [String: Any], forDocument path: String) async throws {
-        try await db.collection("matches").document(path).setData(data, merge: true)
+    public func setData(_ data: [String: Any], collection: String, document: String) async throws {
+        // Fetch Firestore instance lazily to ensure it uses settings applied in AppDelegate/App
+        try await Firestore.firestore().collection(collection).document(document).setData(data, merge: true)
     }
 }
 
+@MainActor
 public class SyncService: ObservableObject, SyncProvider {
     public var statusPublisher: AnyPublisher<Status, Never> {
         $status.eraseToAnyPublisher()
@@ -41,20 +42,64 @@ public class SyncService: ObservableObject, SyncProvider {
     }
     
     /// Syncs the match state to Firestore
-    public func syncMatch(state: MatchState) {
-        self.status = .syncing
+    public func syncMatch(state: MatchState, courtId: String?) {
+        guard status != .syncing else { return }
+        status = .syncing
         
-        Task { @MainActor in
+        Task {
             let data = SyncService.mapToFirestore(state: state)
+            let path = courtId != nil ? "courts/\(courtId!)" : "matches/test-match"
             
             do {
-                try await self.syncProvider.setData(data, forDocument: "test-match")
+                if let courtId = courtId {
+                    // Sync to a specific court's liveMatch field
+                    try await self.syncProvider.setData(["liveMatch": data], collection: "courts", document: courtId)
+                } else {
+                    // Legacy sync for testing
+                    try await self.syncProvider.setData(data, collection: "matches", document: "test-match")
+                }
                 self.status = .synced
-                print("✅ Match synced to Firestore")
+                print("✅ Match synced to \(path)")
             } catch {
                 self.status = .failed(error.localizedDescription)
-                print("❌ Sync failed: \(error.localizedDescription)")
+                print("❌ Sync error: \(error.localizedDescription)")
             }
+        }
+    }
+    
+    /// Syncs the match state to Firestore (Async variant)
+    public func syncMatchAsync(state: MatchState, courtId: String?) async throws {
+        let data = SyncService.mapToFirestore(state: state)
+        // Manual status update for UI feedback
+        status = .syncing
+        
+        do {
+            if let courtId = courtId {
+                try await self.syncProvider.setData(["liveMatch": data], collection: "courts", document: courtId)
+                print("✅ [Async] Match synced to courts/\(courtId)")
+            } else {
+                try await self.syncProvider.setData(data, collection: "matches", document: "test-match")
+            }
+            status = .synced
+        } catch {
+            status = .failed(error.localizedDescription)
+            print("❌ [Async] Sync error: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    /// Unlinks the match from the court in Firestore (clears liveMatch)
+    /// Unlinks the match from the court in Firestore (clears liveMatch)
+    public func unlinkMatch(courtId: String) async {
+        let collection = "courts"
+        let document = courtId
+        
+        do {
+            // Use FieldValue.delete() to remove the field
+            try await self.syncProvider.setData(["liveMatch": FieldValue.delete()], collection: collection, document: document)
+            print("✅ Unlinked match from court \(courtId)")
+        } catch {
+            print("❌ Failed to unlink match: \(error.localizedDescription)")
         }
     }
     
