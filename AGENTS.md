@@ -113,5 +113,9 @@ Every incremental change must follow this cycle:
     - **Component Reusability**: Extracted `CourtList` for shared Admin/Public use.
 
 ### ⏳ Pending / Future
+- **Phase 15: Cross-Platform E2E Automation 🤖**
+    - **Objective**: Verify the "Golden Thread" (Watch Input -> Phone Sync -> Firestore -> Web Dashboard) continuously.
+    - **Strategy**: Orchestrated pipeline combining Playwright (Web) and XCTest (iOS) against the Firebase Emulator Suite.
+    - **Status**: Planned (See `implementation_plan.md`).
 - **Deployment**: Prepare for App Store (TestFlight) and Vercel Production.
 
