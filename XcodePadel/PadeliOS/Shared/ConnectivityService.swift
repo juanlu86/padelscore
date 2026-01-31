@@ -42,7 +42,7 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
         let session = WCSession.default
         let isActivated = session.activationState == .activated
         
-        print("📤 ConnectivityService: Attempting to send state v\(state.version). Activated: \(isActivated), Reachable: \(session.isReachable)")
+        // print("📤 ConnectivityService: Attempting to send state v\(state.version)...")
         
         guard isActivated else {
             print("⏳ ConnectivityService: Session not ready. Queuing pending update.")
@@ -66,20 +66,13 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
             // 1. Preferred method (persists state, but eventually delivered)
             try session.updateApplicationContext(context)
             
-            // 2. Secondary method (queued, better for simulators and background)
-            session.transferUserInfo(context)
-            
-            print("✅ ConnectivityService: Context/UserInfo transfer initiated")
+            // 2. Secondary method (transferUserInfo) REMOVED to prevent queue flooding
+            // session.transferUserInfo(context)
             
             if session.isReachable {
-                session.sendMessage(context, replyHandler: { reply in
-                    print("✅ ConnectivityService: Peer acknowledged update v\(state.version)")
-                }, errorHandler: { error in
+                session.sendMessage(context, replyHandler: nil, errorHandler: { error in
                     print("⚠️ ConnectivityService: sendMessage failed: \(error.localizedDescription)")
                 })
-                print("📤 ConnectivityService: sendMessage emitted")
-            } else {
-                print("⚠️ ConnectivityService: Skipping sendMessage because session is NOT reachable (falling back to Context/UserInfo)")
             }
             
             pendingSync = nil

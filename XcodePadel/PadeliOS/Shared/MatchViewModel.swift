@@ -117,13 +117,13 @@ public class MatchViewModel {
         #else
         let platform = "iOS"
         #endif
-        print("🛠️ MatchViewModel: Activating... Target: \(platform)")
+        // print("🛠️ MatchViewModel: Activating... Target: \(platform)")
         
         // 1. Listen for state updates from the other device
         self.connectivity.updatePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state, isStarted in
-                print("📡 MatchViewModel: Received update. v\(state.version), isStarted: \(isStarted)")
+                // print("📡 MatchViewModel: Received update. v\(state.version)")
                 self?.handleRemoteStateUpdate(state, isStarted: isStarted)
             }
             .store(in: &cancellables)
@@ -156,7 +156,7 @@ public class MatchViewModel {
         
         // 5. Proactive Broadcast: If we already have a match running, tell the peer immediately
         if isMatchStarted || state.version > 0 {
-            print("📤 MatchViewModel: Proactively broadcasting active match on startup (v\(state.version))")
+            // print("📤 MatchViewModel: Proactively broadcasting active match on startup (v\(state.version))")
             propagateChange()
         }
     }
