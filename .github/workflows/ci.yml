@@ -85,5 +85,5 @@ jobs:
           xcodebuild test -project XcodePadel/PadeliOS/PadeliOS.xcodeproj \
             -scheme PadeliOS \
             -destination "platform=iOS Simulator,name=iPhone 17" \
-            -only-testing PadeliOSTests/SyncServiceTests \
+            -parallel-testing-enabled NO \
             CODE_SIGNING_ALLOWED=NO
