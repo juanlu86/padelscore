@@ -20,12 +20,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         FirebaseApp.configure()
         
         #if DEBUG
-        // let settings = FirestoreSettings()
-        // settings.host = "localhost:8080"
-        // settings.isSSLEnabled = false
-        // settings.isPersistenceEnabled = false // Disable persistence to surface errors immediately
-        // Firestore.firestore().settings = settings
-        // print("🔥 Firestore Emulator Connected: localhost:8080")
+        // Firestore Emulator configuration removed for Production/App Check testing
         #endif
         
         // Initialize Watch Connectivity early

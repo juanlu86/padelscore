@@ -38,6 +38,26 @@ Deployment is handled via Firebase Hosting (Standard). **Do not use App Hosting.
    firebase deploy --only hosting
    ```
 
+## 🔐 Security & Environment
+
+### Environment Variables
+Create a `.env.local` file in `PadelWeb/` with your Firebase credentials:
+
+```bash
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSy...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+NEXT_PUBLIC_FIREBASE_APP_ID=1:...
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=... # ReCAPTCHA v3 Enterprise Site Key
+# NEXT_PUBLIC_USE_FIREBASE_EMULATOR=true # Optional: Connect to local emulators
+```
+
+### App Check
+- **Web**: Uses reCAPTCHA v3 invisible badge.
+- **Localhost**: Requires adding a Debug Token to Firebase Console > App Check > Web App.
+
 ## 🧪 Testing
 Run Playwright/Vitest tests (if configured):
 ```bash
