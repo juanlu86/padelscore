@@ -9,12 +9,15 @@ final class MatchViewModelTests: XCTestCase {
     var mockSync: MockSyncProvider!
     var cancellables: Set<AnyCancellable>!
 
-    override func setUp() {
-        super.setUp()
-        UserDefaults.standard.removeObject(forKey: "linkedCourtId")
-        mockConnectivity = MockConnectivityProvider()
-        mockSync = MockSyncProvider()
-        viewModel = MatchViewModel(state: MatchState(), connectivity: mockConnectivity, sync: mockSync)
+    override func setUp() async throws {
+        try await super.setUp()
+        await MainActor.run {
+            UserDefaults.standard.removeObject(forKey: "linkedCourtId")
+            CourtLinkManager.shared.resetForTesting()
+            mockConnectivity = MockConnectivityProvider()
+            mockSync = MockSyncProvider()
+            viewModel = MatchViewModel(state: MatchState(), connectivity: mockConnectivity, sync: mockSync)
+        }
         cancellables = []
     }
 

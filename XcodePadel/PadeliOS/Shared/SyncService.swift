@@ -6,6 +6,7 @@ import PadelCore
 import FirebaseFirestore
 
 /// Protocol to allow mocking Firestore for tests
+@MainActor
 public protocol FirestoreSyncable {
     func setData(_ data: [String: Any], collection: String, document: String) async throws
 }
@@ -37,8 +38,8 @@ public class SyncService: ObservableObject, SyncProvider {
     private let syncProvider: FirestoreSyncable
     
     /// Initializer with dependency injection
-    public init(provider: FirestoreSyncable = ProductionFirestore()) {
-        self.syncProvider = provider
+    public init(provider: FirestoreSyncable? = nil) {
+        self.syncProvider = provider ?? ProductionFirestore()
     }
     
     private var pendingUpdate: (MatchState, String?)?
@@ -59,7 +60,7 @@ public class SyncService: ObservableObject, SyncProvider {
         status = .syncing
         
         Task {
-            let data = SyncService.mapToFirestore(state: state)
+            let data = MatchFirestoreMapper.mapToFirestore(state: state)
             let path = courtId != nil ? "courts/\(courtId!)" : "matches/test-match"
             
             do {
@@ -101,7 +102,7 @@ public class SyncService: ObservableObject, SyncProvider {
     
     /// Syncs the match state to Firestore (Async variant)
     public func syncMatchAsync(state: MatchState, courtId: String?) async throws {
-        let data = SyncService.mapToFirestore(state: state)
+        let data = MatchFirestoreMapper.mapToFirestore(state: state)
         // Manual status update for UI feedback
         status = .syncing
         
@@ -138,35 +139,6 @@ public class SyncService: ObservableObject, SyncProvider {
             print("❌ Failed to unlink match: \(error.localizedDescription)")
         }
     }
-    
-    /// Maps MatchState to Firestore dictionary
-    public static func mapToFirestore(state: MatchState) -> [String: Any] {
-        return [
-            "team1": state.team1.isEmpty ? "Team 1" : state.team1,
-            "team2": state.team2.isEmpty ? "Team 2" : state.team2,
-            "score": [
-                "team1": state.isTieBreak ? "\(state.team1TieBreakPoints)" : state.team1Score.rawValue,
-                "team2": state.isTieBreak ? "\(state.team2TieBreakPoints)" : state.team2Score.rawValue
-            ],
-            "games": [
-                "team1": state.team1Games,
-                "team2": state.team2Games
-            ],
-            "sets": [
-                "team1": state.team1Sets,
-                "team2": state.team2Sets
-            ],
-            "completedSets": state.completedSets.map { [
-                "team1": $0.team1Games,
-                "team2": $0.team2Games
-            ]},
-            "servingTeam": state.servingTeam,
-            "status": state.isMatchOver ? "finished" : "live",
-            "scoringSystem": state.scoringSystem.rawValue,
-            "deuceCount": state.deuceCount,
-            "version": state.version,
-            "updatedAt": FieldValue.serverTimestamp()
-        ]
-    }
 }
+
 #endif

@@ -28,6 +28,8 @@
 		95FB7BFA2F2AD3ED00B7DC55 /* ConnectivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7BF82F2AD3ED00B7DC55 /* ConnectivityService.swift */; };
 		95FB7C012F2B4D0000B7DC55 /* WorkoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C002F2B4D0000B7DC55 /* WorkoutManager.swift */; };
 		95FB7C022F2B4D0000B7DC55 /* WorkoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C002F2B4D0000B7DC55 /* WorkoutManager.swift */; };
+		95FB7C062F2B4DFF00B7DC55 /* MatchFirestoreMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C052F2B4DFF00B7DC55 /* MatchFirestoreMapper.swift */; };
+		95FB7C082F2B4DFF00B7DC55 /* CourtLinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C072F2B4DFF00B7DC55 /* CourtLinkManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +97,8 @@
 		95FB7BEC2F2ACFDE00B7DC55 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
 		95FB7BF82F2AD3ED00B7DC55 /* ConnectivityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivityService.swift; sourceTree = "<group>"; };
 		95FB7C002F2B4D0000B7DC55 /* WorkoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutManager.swift; sourceTree = "<group>"; };
+		95FB7C052F2B4DFF00B7DC55 /* MatchFirestoreMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchFirestoreMapper.swift; sourceTree = "<group>"; };
+		95FB7C072F2B4DFF00B7DC55 /* CourtLinkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourtLinkManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -228,6 +232,8 @@
 				95FB7BE42F2A69E000B7DC55 /* MatchSummaryView.swift */,
 				95FB7BDE2F2A615D00B7DC55 /* MatchViewModel.swift */,
 				95FB7C002F2B4D0000B7DC55 /* WorkoutManager.swift */,
+				95FB7C052F2B4DFF00B7DC55 /* MatchFirestoreMapper.swift */,
+				95FB7C072F2B4DFF00B7DC55 /* CourtLinkManager.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -499,6 +505,8 @@
 				95FB7BE92F2A6DDE00B7DC55 /* MatchSettingsView.swift in Sources */,
 				95FB7BE52F2A69E000B7DC55 /* MatchSummaryView.swift in Sources */,
 				95FB7C012F2B4D0000B7DC55 /* WorkoutManager.swift in Sources */,
+				95FB7C062F2B4DFF00B7DC55 /* MatchFirestoreMapper.swift in Sources */,
+				95FB7C082F2B4DFF00B7DC55 /* CourtLinkManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -32,7 +32,7 @@ final class SyncServiceTests: XCTestCase {
         state.team2Games = 1
         state.isMatchOver = false
         
-        let data = SyncService.mapToFirestore(state: state)
+        let data = MatchFirestoreMapper.mapToFirestore(state: state)
         
         XCTAssertEqual(data["status"] as? String, "live")
         
@@ -56,10 +56,7 @@ final class SyncServiceTests: XCTestCase {
         let service = SyncService(provider: mock)
         let state = MatchState()
         
-        // Use an expectation to wait for the @MainActor task
-        let expectation = XCTestExpectation(description: "Sync finishes")
-        
-        await service.syncMatch(state: state, courtId: nil)
+        service.syncMatch(state: state, courtId: nil)
         
         // Since syncMatch uses Task { @MainActor in ... }, we should be able to check 
         // the status after a small delay or by using a continuation.
