@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude tests/*.rules.test.ts",
+    "test:rules": "vitest run tests/firestore.rules.test.ts"
   },
   "dependencies": {
     "firebase": "^12.8.0",
