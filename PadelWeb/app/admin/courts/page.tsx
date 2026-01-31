@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { db, auth } from '../../../lib/firebase';
-import { collection, onSnapshot, doc, updateDoc, setDoc, serverTimestamp, deleteDoc, deleteField } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, setDoc, serverTimestamp, deleteDoc, deleteField, query, where } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { Court } from '../../../types/court';
 import { useAuth } from '../../../hooks/useAuth';
@@ -20,7 +20,10 @@ export default function AdminCourts() {
     const router = useRouter();
 
     useEffect(() => {
-        const unsub = onSnapshot(collection(db, 'courts'), (snapshot) => {
+        // Query only active courts
+        const q = query(collection(db, 'courts'), where('isActive', '==', true));
+
+        const unsub = onSnapshot(q, (snapshot) => {
             const courtsData = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
@@ -84,11 +87,16 @@ export default function AdminCourts() {
     };
 
     const deleteCourt = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this court? All live data will be lost.')) return;
+        if (!confirm('Are you sure you want to archive this court?')) return;
         try {
-            await deleteDoc(doc(db, 'courts', id));
+            // Soft delete
+            await updateDoc(doc(db, 'courts', id), {
+                isActive: false,
+                updatedAt: serverTimestamp()
+            });
         } catch (error) {
-            console.error("Error deleting court: ", error);
+            console.error("Error archiving court: ", error);
+            alert("Failed to archive court. Check console.");
         }
     };
 

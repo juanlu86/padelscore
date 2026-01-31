@@ -20,7 +20,7 @@ vi.mock('../../../hooks/useAuth', () => ({
 // Mock Firebase Firestore
 vi.mock('firebase/firestore', () => ({
     collection: vi.fn(),
-    doc: vi.fn(),
+    doc: vi.fn((_db, _coll, id) => ({ id })), // Return a mock doc ref
     onSnapshot: vi.fn(() => () => { }),
     addDoc: vi.fn(),
     deleteDoc: vi.fn(),
@@ -29,6 +29,8 @@ vi.mock('firebase/firestore', () => ({
     serverTimestamp: vi.fn(() => 'timestamp'),
     deleteField: vi.fn(),
     getFirestore: vi.fn(),
+    query: vi.fn((c) => c), // Pass-through collection
+    where: vi.fn(),
 }));
 
 vi.mock('firebase/auth', () => ({
@@ -126,7 +128,8 @@ describe('AdminCourts Component', () => {
         fireEvent.click(deleteBtn);
 
         expect(confirmSpy).toHaveBeenCalled();
-        expect(deleteDoc).toHaveBeenCalled();
+        expect(updateDoc).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ isActive: false }));
+        expect(deleteDoc).not.toHaveBeenCalled();
     });
 
     it('allows editing an existing court', async () => {
