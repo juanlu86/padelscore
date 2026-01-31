@@ -54,10 +54,17 @@ The project uses the **Firebase Emulator Suite** for local parity.
 ---
 
 ## 🧪 Testing & Verification
-
-- **Sync**: Logic includes a **Pending Update Queue** to prevent Watch-to-Web data loss during rapid scoring.
-
----
+ 
+ - **Sync**: Logic includes a **Pending Update Queue** to prevent Watch-to-Web data loss during rapid scoring.
+ 
+ ### 📱 Running iOS Tests
+ We have an optimized script for fast, serial verification:
+ ```bash
+ ./Scripts/test_ios.sh
+ ```
+ This runs Unit Tests only (skipping slow UI tests) and ensures the environment matches CI.
+ 
+ ---
 
 ## 🛡️ Security
 

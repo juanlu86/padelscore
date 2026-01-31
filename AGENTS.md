@@ -103,9 +103,11 @@ Every incremental change must follow this cycle:
     - **iOS**: Implemented `DeviceCheck` (Prod) and `DebugProvider` (Sim).
     - **Web**: Implemented `reCAPTCHA v3` (Invisible).
     - **Enforcement**: Firestore access is now strictly limited to verified apps/users.
+- **Phase 13: Optimization & Persistence ⚡️**
+    - **Performance**: Implemented 500ms debounce and background flush for `SyncService`.
+    - **Stability**: Fixed "Stale State on Launch" using local persistence and temporal validation.
+    - **Infrastructure**: Unified CI and Local testing with `Scripts/test_ios.sh` and automated Workflows.
 
 ### ⏳ Pending / Future
-- **Optimization**: Reduce redundant `SyncService` logs and network traffic.
-- **Deep Verification**: Verify Simulator-specific cold start race condition (rare).
 - **Deployment**: Prepare for App Store (TestFlight) and Vercel Production.
 
