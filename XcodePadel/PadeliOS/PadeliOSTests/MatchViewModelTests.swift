@@ -208,4 +208,77 @@ final class MatchViewModelTests: XCTestCase {
         NSLog("Test: unlinkedCourtId is \(String(describing: mockSync.unlinkedCourtId))")
         XCTAssertEqual(mockSync.unlinkedCourtId, "COURT-TO-DELETE")
     }
+    
+    // MARK: - Regression Tests for Sync & Activation Logic
+    
+    func testActivateIsIdempotent() async {
+        // Test that calling activate multiple times doesn't duplicate side effects
+        
+        // 1. Setup linked court to trigger sync
+        let courtId = "COURT-IDEMPOTENCY-TEST"
+        await MainActor.run {
+            viewModel.linkedCourtId = courtId
+        }
+        
+        // 2. First Activation
+        await MainActor.run {
+            viewModel.activate()
+        }
+        
+        // Allow async task in activate to run
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        
+        let syncCountAfterFirst = mockSync.syncCount
+        XCTAssertGreaterThanOrEqual(syncCountAfterFirst, 1, "Should sync on first activation")
+        
+        // 3. Second Activation
+        await MainActor.run {
+            viewModel.activate()
+        }
+        
+        // Allow async task (if any) to run
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        
+        // 4. Verify no new syncs triggered
+        XCTAssertEqual(mockSync.syncCount, syncCountAfterFirst, "Activate should be idempotent and not trigger re-syncs")
+    }
+    
+    func testStickyRequestHandling() async {
+        // Test that a pending request from ConnectivityService is handled upon activation
+        
+        // 1. Simulate a sticky request arriving *before* activation
+        mockConnectivity.hasPendingRequest = true
+        
+        // 2. Activate
+        await MainActor.run {
+            viewModel.activate()
+        }
+        
+        // 3. Verify response sent
+        XCTAssertEqual(mockConnectivity.sendCount, 1, "Should respond to sticky request on activation")
+        XCTAssertFalse(mockConnectivity.hasPendingRequest, "Should clear the sticky request flag")
+    }
+    
+    func testProactiveBroadcastOnStartup() async {
+        // Test that if we start with an active match, we announce it
+        
+        // 1. Create a VIewModel that thinks match is started
+        var activeState = MatchState()
+        activeState.version = 5
+        
+        let activeVM = await MainActor.run {
+            let vm = MatchViewModel(state: activeState, connectivity: mockConnectivity, sync: mockSync)
+            vm.isMatchStarted = true 
+            return vm
+        }
+        
+        // 2. Activate
+        await MainActor.run {
+            activeVM.activate()
+        }
+        
+        // 3. Verify broadcast
+        XCTAssertEqual(mockConnectivity.sendCount, 1, "Should proactivelly broadcast state if match is running/active")
+        XCTAssertEqual(mockConnectivity.lastSentState?.version, 5)
+    }
 }

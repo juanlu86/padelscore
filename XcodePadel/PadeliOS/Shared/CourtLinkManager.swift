@@ -62,10 +62,11 @@ public class CourtLinkManager {
                 guard let self = self, let snapshot = snapshot else { return }
                 
                 if snapshot.exists && snapshot.data()?["liveMatch"] == nil {
-                    print("🚫 CourtLinkManager: Court \(id) reset by admin. Unlinking.")
-                    Task { @MainActor in
-                        self.unlink()
-                    }
+                    // print("🚫 CourtLinkManager: Court \(id) reset by admin. Unlinking.")
+                    // Task { @MainActor in
+                    //     self.unlink()
+                    // }
+                    print("⚠️ CourtLinkManager: Court \(id) has no live match. Keeping link active.")
                 }
             }
     }
