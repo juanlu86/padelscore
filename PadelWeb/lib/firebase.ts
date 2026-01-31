@@ -39,7 +39,7 @@ if (process.env.NODE_ENV === 'development') {
 
 
 // Initialize App Check (Client-Side Only)
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR !== 'true') {
     initializeAppCheck(app, {
         provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || 'NOT_CONFIGURED'),
         isTokenAutoRefreshEnabled: true
