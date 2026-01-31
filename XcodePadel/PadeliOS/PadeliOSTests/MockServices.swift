@@ -26,11 +26,18 @@ public class MockConnectivityProvider: ConnectivityProvider {
     public var sendCount = 0
     
     public var requestCount = 0
+    public var persistExpectation: XCTestExpectation?
     
     public func send(state: MatchState, isStarted: Bool) {
         lastSentState = state
         lastSentIsStarted = isStarted
         sendCount += 1
+    }
+    
+    public func persistState(state: MatchState, isStarted: Bool) {
+        lastSentState = state
+        lastSentIsStarted = isStarted
+        persistExpectation?.fulfill()
     }
     
     public func requestLatestState() {

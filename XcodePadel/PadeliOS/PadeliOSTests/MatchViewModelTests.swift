@@ -18,6 +18,7 @@ final class MatchViewModelTests: XCTestCase {
             mockConnectivity = MockConnectivityProvider()
             mockSync = MockSyncProvider()
             viewModel = MatchViewModel(state: MatchState(), connectivity: mockConnectivity, sync: mockSync)
+            viewModel.activate()
         }
         cancellables = []
     }
@@ -247,11 +248,17 @@ final class MatchViewModelTests: XCTestCase {
         // Test that a pending request from ConnectivityService is handled upon activation
         
         // 1. Simulate a sticky request arriving *before* activation
+        // We need a fresh VM because setUp() already activated the default one
+        mockConnectivity = MockConnectivityProvider()
         mockConnectivity.hasPendingRequest = true
+        
+        let localVM = await MainActor.run {
+             return MatchViewModel(state: MatchState(), connectivity: mockConnectivity, sync: mockSync)
+        }
         
         // 2. Activate
         await MainActor.run {
-            viewModel.activate()
+            localVM.activate()
         }
         
         // 3. Verify response sent
@@ -281,5 +288,36 @@ final class MatchViewModelTests: XCTestCase {
         // 3. Verify broadcast
         XCTAssertEqual(mockConnectivity.sendCount, 1, "Should proactivelly broadcast state if match is running/active")
         XCTAssertEqual(mockConnectivity.lastSentState?.version, 5)
+    }
+
+    func testRemoteUpdatePersistsToContext() async throws {
+        // Regression Test for Stale State Bug:
+        // Ensure that when we receive a remote update, we persist it to the local 
+        // ApplicationContext so that subsequent restarts don't read stale data.
+        
+        // 1. Initial State
+        XCTAssertNil(mockConnectivity.lastSentState)
+        
+        // 2. Setup Expectation
+        let expectation = XCTestExpectation(description: "persistState called")
+        mockConnectivity.persistExpectation = expectation
+        
+        // 3. Simulate User A (Watch) sending us an update
+        var remoteState = MatchState()
+        remoteState.version = 50
+        remoteState.team1Score = .thirty
+        
+        print("Test: Simulate receiving remote state v50")
+        mockConnectivity.simulateUpdate(state: remoteState, isStarted: true)
+        
+        // 4. Wait for Expectation (Async Pipeline)
+        await fulfillment(of: [expectation], timeout: 2.0)
+        
+        // 5. Verify Local Update
+        XCTAssertEqual(viewModel.state.version, 50)
+        
+        // 6. Verify Persistence was requested
+        XCTAssertNotNil(mockConnectivity.lastSentState, "Should have persisted the received state")
+        XCTAssertEqual(mockConnectivity.lastSentState?.version, 50, "Persisted state should match remote version")
     }
 }

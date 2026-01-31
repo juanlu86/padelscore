@@ -85,20 +85,29 @@ Every incremental change must follow this cycle:
 
 ### ✅ Completed
 - **Phase 1: Web Admin & Court Infrastructure**
-    - Firestore `/courts` schema and security rules (development version).
+    - Firestore `/courts` schema and security rules.
     - Next.js Admin Panel with Court CRUD and inline name editing.
     - Dynamic Court Dashboard for real-time spectator scoring.
-- **Phase 2: iOS/Watch Integration & Sync Stability**
-    - Native iPhone QR Scanner and pairing logic with **Simulator Support**.
-    - **Sync Stability**: Implemented "Pending Update Queue" in `SyncService` to prevent Watch-to-Web data loss.
-    - **Test Hardening**: Resolved async race conditions in `MatchViewModelTests`.
-    - Duplicate file cleanup (Removed shadowed `QRScannerView.swift`).
+- **Phase 2-8: iOS/Watch Integration & Sync Mastery**
+    - **Sync Reliability**: Implemented "Pending Update Queue" & Request-Response pattern to prevent data loss.
+    - **Modern Architecture**: Migrated to Swift 6 Concurrency (`@MainActor`) and Observation framework (`@Observable`).
+    - **Protocol Unification**: Centralized `ConnectivityProvider` and `SyncProvider` logic.
+    - **Test Hardening**: Full regression suite for async race conditions and double-sync scenarios.
+- **Phase 9: Refactoring & Cleanup**
+    - Removed legacy code (Combine/ObservableObject).
+    - Hardened project documentation (Security & Env setup).
+- **Phase 10: Admin Authentication 🔐**
+    - Secured Admin Panel with Firebase Auth (Email/Password).
+    - Protected Routes (`/admin`) and global Auth Context.
+- **Phase 12: App Check Integration 🛡️**
+    - **iOS**: Implemented `DeviceCheck` (Prod) and `DebugProvider` (Sim).
+    - **Web**: Implemented `reCAPTCHA v3` (Invisible).
+    - **Enforcement**: Firestore access is now strictly limited to verified apps/users.
+- **Phase 13: Optimization & Persistence ⚡️**
+    - **Performance**: Implemented 500ms debounce and background flush for `SyncService`.
+    - **Stability**: Fixed "Stale State on Launch" using local persistence and temporal validation.
+    - **Infrastructure**: Unified CI and Local testing with `Scripts/test_ios.sh` and automated Workflows.
 
-### ⏳ Pending
-- **Phase 3: Security & Verification**
-    - [ ] Implement Production-ready (hardened) Firestore Rules.
-    - [ ] Admin Panel Authentication (secure access to manager features).
-    - [ ] Verify Managed-Only mode (Syncing without Watch latency).
-    - [ ] Verify Local-Only mode (Match without backend sync).
-    - [ ] Full regression testing of HealthKit and special scoring systems.
+### ⏳ Pending / Future
+- **Deployment**: Prepare for App Store (TestFlight) and Vercel Production.
 

@@ -54,5 +54,26 @@ The project uses the **Firebase Emulator Suite** for local parity.
 ---
 
 ## 🧪 Testing & Verification
+ 
+ - **Sync**: Logic includes a **Pending Update Queue** to prevent Watch-to-Web data loss during rapid scoring.
+ 
+ ### 📱 Running iOS Tests
+ We have an optimized script for fast, serial verification:
+ ```bash
+ ./Scripts/test_ios.sh
+ ```
+ This runs Unit Tests only (skipping slow UI tests) and ensures the environment matches CI.
+ 
+ ---
 
-- **Sync**: Logic includes a **Pending Update Queue** to prevent Watch-to-Web data loss during rapid scoring.
+## 🛡️ Security
+
+The system is secured using **Firebase App Check** and **Firestore Security Rules**:
+
+1.  **App Check**:
+    *   **iOS**: Enforces `DeviceCheck` (AppAttest) in production.
+        *   *Simulator*: Requires registering the Debug Token printed in Xcode Console.
+    *   **Web**: Enforces `reCAPTCHA v3` invisible verification.
+        *   *Localhost*: Requires registering the Debug Token from Browser Console.
+2.  **Auth**: Admin Panel is protected by Firebase Auth (Email/Password).
+3.  **Rules**: Unauthenticated access is read-only (spectators) or restricted (live match updates only).

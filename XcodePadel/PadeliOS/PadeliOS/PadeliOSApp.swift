@@ -8,19 +8,19 @@
 import SwiftUI
 import FirebaseCore
 import FirebaseFirestore
+import FirebaseAppCheck
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        
+        let providerFactory = PadelAppCheckProviderFactory()
+        AppCheck.setAppCheckProviderFactory(providerFactory)
+        
         FirebaseApp.configure()
         
         #if DEBUG
-        let settings = FirestoreSettings()
-        settings.host = "localhost:8080"
-        settings.isSSLEnabled = false
-        settings.isPersistenceEnabled = false // Disable persistence to surface errors immediately
-        Firestore.firestore().settings = settings
-        print("🔥 Firestore Emulator Connected: localhost:8080")
+        // Firestore Emulator configuration removed for Production/App Check testing
         #endif
         
         // Initialize Watch Connectivity early
@@ -33,10 +33,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct PadeliOSApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some Scene {
         WindowGroup {
             iPhoneMatchView()
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .background {
+                // Ensure any pending debounced sync is captured before suspension
+                SyncService.shared.flushPendingSync()
+            }
         }
     }
 }

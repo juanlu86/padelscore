@@ -7,9 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95FB7C972F2A999900B7DC55 /* MatchSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C992F2A999900B7DC55 /* MatchSessionCoordinator.swift */; };
-		95FB7C962F2A999900B7DC55 /* MatchSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C992F2A999900B7DC55 /* MatchSessionCoordinator.swift */; };
-		95FB7C952F2A999900B7DC55 /* MatchSessionCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C982F2A999900B7DC55 /* MatchSessionCoordinatorTests.swift */; };
+		957CA4092F2E61E700FCE289 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 957CA4082F2E61E700FCE289 /* FirebaseAppCheck */; };
 		95FB7B8F2F2A5A4C00B7DC55 /* PadeliOS Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 95FB7B8E2F2A5A4C00B7DC55 /* PadeliOS Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		95FB7BD32F2A5E5000B7DC55 /* PadelCore in Frameworks */ = {isa = PBXBuildFile; productRef = 95FB7BD22F2A5E5000B7DC55 /* PadelCore */; };
 		95FB7BD52F2A5E5700B7DC55 /* PadelCore in Frameworks */ = {isa = PBXBuildFile; productRef = 95FB7BD42F2A5E5700B7DC55 /* PadelCore */; };
@@ -35,6 +33,9 @@
 		95FB7C082F2B4DFF00B7DC55 /* CourtLinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C072F2B4DFF00B7DC55 /* CourtLinkManager.swift */; };
 		95FB7C112F2B4DFF00B7DC55 /* ServiceProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C132F2B4DFF00B7DC55 /* ServiceProtocols.swift */; };
 		95FB7C122F2B4DFF00B7DC55 /* ServiceProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C132F2B4DFF00B7DC55 /* ServiceProtocols.swift */; };
+		95FB7C952F2A999900B7DC55 /* PadeliOSTests/MatchSessionCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C982F2A999900B7DC55 /* PadeliOSTests/MatchSessionCoordinatorTests.swift */; };
+		95FB7C962F2A999900B7DC55 /* Shared/MatchSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C992F2A999900B7DC55 /* Shared/MatchSessionCoordinator.swift */; };
+		95FB7C972F2A999900B7DC55 /* Shared/MatchSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FB7C992F2A999900B7DC55 /* Shared/MatchSessionCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -90,8 +91,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		95FB7C992F2A999900B7DC55 /* MatchSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared/MatchSessionCoordinator.swift; sourceTree = SOURCE_ROOT; };
-		95FB7C982F2A999900B7DC55 /* MatchSessionCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PadeliOSTests/MatchSessionCoordinatorTests.swift; sourceTree = SOURCE_ROOT; };
 		95FB7B6B2F2A5A4C00B7DC55 /* PadeliOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PadeliOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		95FB7B782F2A5A4C00B7DC55 /* PadeliOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PadeliOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		95FB7B822F2A5A4C00B7DC55 /* PadeliOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PadeliOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -107,6 +106,8 @@
 		95FB7C052F2B4DFF00B7DC55 /* MatchFirestoreMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchFirestoreMapper.swift; sourceTree = "<group>"; };
 		95FB7C072F2B4DFF00B7DC55 /* CourtLinkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourtLinkManager.swift; sourceTree = "<group>"; };
 		95FB7C132F2B4DFF00B7DC55 /* ServiceProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceProtocols.swift; sourceTree = "<group>"; };
+		95FB7C982F2A999900B7DC55 /* PadeliOSTests/MatchSessionCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PadeliOSTests/MatchSessionCoordinatorTests.swift; sourceTree = SOURCE_ROOT; };
+		95FB7C992F2A999900B7DC55 /* Shared/MatchSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared/MatchSessionCoordinator.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -147,6 +148,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				957CA4092F2E61E700FCE289 /* FirebaseAppCheck in Frameworks */,
 				95FB7BF12F2AD0F900B7DC55 /* FirebaseCore in Frameworks */,
 				95FB7BD32F2A5E5000B7DC55 /* PadelCore in Frameworks */,
 				95FB7BF32F2AD0F900B7DC55 /* FirebaseFirestore in Frameworks */,
@@ -199,7 +201,7 @@
 		95FB7B622F2A5A4C00B7DC55 = {
 			isa = PBXGroup;
 			children = (
-				95FB7C982F2A999900B7DC55 /* MatchSessionCoordinatorTests.swift */,
+				95FB7C982F2A999900B7DC55 /* PadeliOSTests/MatchSessionCoordinatorTests.swift */,
 				95FB7BDF2F2A615D00B7DC55 /* Shared */,
 				95FB7B6D2F2A5A4C00B7DC55 /* PadeliOS */,
 				95FB7B7B2F2A5A4C00B7DC55 /* PadeliOSTests */,
@@ -235,7 +237,7 @@
 		95FB7BDF2F2A615D00B7DC55 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				95FB7C992F2A999900B7DC55 /* MatchSessionCoordinator.swift */,
+				95FB7C992F2A999900B7DC55 /* Shared/MatchSessionCoordinator.swift */,
 				95FB7BF82F2AD3ED00B7DC55 /* ConnectivityService.swift */,
 				95FB7BEC2F2ACFDE00B7DC55 /* SyncService.swift */,
 				95FB7BE72F2A6DDE00B7DC55 /* MatchSettingsView.swift */,
@@ -274,6 +276,7 @@
 				95FB7BD22F2A5E5000B7DC55 /* PadelCore */,
 				95FB7BF02F2AD0F900B7DC55 /* FirebaseCore */,
 				95FB7BF22F2AD0F900B7DC55 /* FirebaseFirestore */,
+				957CA4082F2E61E700FCE289 /* FirebaseAppCheck */,
 			);
 			productName = PadeliOS;
 			productReference = 95FB7B6B2F2A5A4C00B7DC55 /* PadeliOS.app */;
@@ -510,7 +513,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95FB7C972F2A999900B7DC55 /* MatchSessionCoordinator.swift in Sources */,
+				95FB7C972F2A999900B7DC55 /* Shared/MatchSessionCoordinator.swift in Sources */,
 				95FB7BE12F2A615D00B7DC55 /* MatchViewModel.swift in Sources */,
 				95FB7BF92F2AD3ED00B7DC55 /* ConnectivityService.swift in Sources */,
 				95FB7BEE2F2ACFDE00B7DC55 /* SyncService.swift in Sources */,
@@ -527,7 +530,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95FB7C952F2A999900B7DC55 /* MatchSessionCoordinatorTests.swift in Sources */,
+				95FB7C952F2A999900B7DC55 /* PadeliOSTests/MatchSessionCoordinatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -542,7 +545,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95FB7C962F2A999900B7DC55 /* MatchSessionCoordinator.swift in Sources */,
+				95FB7C962F2A999900B7DC55 /* Shared/MatchSessionCoordinator.swift in Sources */,
 				95FB7BED2F2ACFDE00B7DC55 /* SyncService.swift in Sources */,
 				95FB7BE82F2A6DDE00B7DC55 /* MatchSettingsView.swift in Sources */,
 				95FB7BFA2F2AD3ED00B7DC55 /* ConnectivityService.swift in Sources */,
@@ -1114,6 +1117,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		957CA4082F2E61E700FCE289 /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 95FB7BEF2F2AD0F900B7DC55 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
+		};
 		95FB7BD22F2A5E5000B7DC55 /* PadelCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 95FB7BC42F2A5A8900B7DC55 /* XCLocalSwiftPackageReference "../../PadelCore" */;

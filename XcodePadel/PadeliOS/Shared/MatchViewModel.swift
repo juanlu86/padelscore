@@ -244,5 +244,10 @@ extension MatchViewModel {
         let courtId = linkedCourtId.isEmpty ? nil : linkedCourtId
         sync.syncMatch(state: state, courtId: courtId)
         #endif
+        
+        // CRITICAL FOR RECOVERY: Persist the received state to our local Connectivity buffer.
+        // This ensures that if the app is killed and relaunched, we read this LATEST state (v100)
+        // instead of an outdated state (v15) that we happened to originate hours ago.
+        connectivity.persistState(state: newState, isStarted: isStarted)
     }
 }
