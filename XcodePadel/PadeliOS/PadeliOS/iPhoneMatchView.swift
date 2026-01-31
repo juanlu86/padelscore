@@ -123,6 +123,9 @@ struct iPhoneMatchView: View {
                 onDismiss: { viewModel.resetMatch() }
             )
         }
+        .onAppear {
+            viewModel.activate()
+        }
     }
     
     private func calculateTeamWinner() -> Int {

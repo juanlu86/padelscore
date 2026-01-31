@@ -4,6 +4,7 @@ import Combine
 import PadelCore
 @testable import PadeliOS
 
+@MainActor
 public class MockConnectivityProvider: ConnectivityProvider {
     public var receivedState: MatchState?
     public var receivedIsStarted: Bool?
@@ -17,15 +18,27 @@ public class MockConnectivityProvider: ConnectivityProvider {
     }
     
     public let updatePublisher = PassthroughSubject<(MatchState, Bool), Never>()
+    public let stateRequestPublisher = PassthroughSubject<Void, Never>()
+    public var hasPendingRequest: Bool = false
     
     public var lastSentState: MatchState?
     public var lastSentIsStarted: Bool?
     public var sendCount = 0
     
+    public var requestCount = 0
+    
     public func send(state: MatchState, isStarted: Bool) {
         lastSentState = state
         lastSentIsStarted = isStarted
         sendCount += 1
+    }
+    
+    public func requestLatestState() {
+        requestCount += 1
+    }
+    
+    public func clearPendingRequest() {
+        hasPendingRequest = false
     }
     
     public func simulateUpdate(state: MatchState, isStarted: Bool) {

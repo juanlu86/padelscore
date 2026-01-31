@@ -6,10 +6,12 @@ import PadelCore
 import FirebaseFirestore
 #endif
 
+@MainActor
 @Observable
 public class MatchViewModel {
     public var state: MatchState
     public var isMatchStarted: Bool = false
+    private var hasActivated: Bool = false
     #if !os(watchOS)
     private let courtLink = CourtLinkManager.shared
     #endif
@@ -72,18 +74,26 @@ public class MatchViewModel {
     
     public init(
         state: MatchState = MatchState(),
-        connectivity: ConnectivityProvider = ConnectivityService.shared,
-        sync: SyncProvider? = nil // Defaulted below
+        connectivity: ConnectivityProvider? = nil,
+        sync: SyncProvider? = nil
     ) {
         var initialState = state
         if initialState.team1.isEmpty { initialState.team1 = "TEAM 1" }
         if initialState.team2.isEmpty { initialState.team2 = "TEAM 2" }
         self.state = initialState
-        self.connectivity = connectivity
+        self.connectivity = connectivity ?? ConnectivityService.shared
         
         #if !os(watchOS)
         self.sync = sync ?? SyncService.shared
+        #endif
         
+    }
+    
+    public func activate() {
+        guard !hasActivated else { return }
+        hasActivated = true
+        
+        #if !os(watchOS)
         // Listen for sync status updates
         self.sync.statusPublisher
             .receive(on: DispatchQueue.main)
@@ -92,31 +102,63 @@ public class MatchViewModel {
             }
             .store(in: &cancellables)
             
-        // Observe court link changes to trigger initial sync
-        withObservationTracking {
-            _ = courtLink.linkedCourtId
-        } onChange: { [weak self] in
-            Task { @MainActor [weak self] in
-                guard let self = self else { return }
-                let id = courtLink.linkedCourtId
-                if !id.isEmpty {
-                    try? await self.sync.syncMatchAsync(state: self.state, courtId: id)
-                }
+        // Initial sync if court is already linked
+        Task { @MainActor [weak self] in
+            guard let self = self else { return }
+            let id = courtLink.linkedCourtId
+            if !id.isEmpty {
+                 try? await self.sync.syncMatchAsync(state: self.state, courtId: id)
             }
         }
         #endif
         
-        // Listen for updates from the other device
+        #if os(watchOS)
+        let platform = "watchOS"
+        #else
+        let platform = "iOS"
+        #endif
+        print("🛠️ MatchViewModel: Activating... Target: \(platform)")
+        
+        // 1. Listen for state updates from the other device
         self.connectivity.updatePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state, isStarted in
+                print("📡 MatchViewModel: Received update. v\(state.version), isStarted: \(isStarted)")
                 self?.handleRemoteStateUpdate(state, isStarted: isStarted)
             }
             .store(in: &cancellables)
+            
+        // 2. Listen for state requests from the other device (Peer asking us for the score)
+        self.connectivity.stateRequestPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                print("📥 MatchViewModel: Peer requested state. Sending current state...")
+                self?.propagateChange()
+            }
+            .store(in: &cancellables)
+            
+        // 3. Initial Sync Strategy
+        if let initialRemoteState = self.connectivity.receivedState,
+           let initialIsStarted = self.connectivity.receivedIsStarted {
+            print("🚀 MatchViewModel: Found existing remote state in ConnectivityService: v\(initialRemoteState.version)")
+            handleRemoteStateUpdate(initialRemoteState, isStarted: initialIsStarted)
+        } else {
+            print("ℹ️ MatchViewModel: No initial remote state. Requesting from peer...")
+            self.connectivity.requestLatestState()
+        }
         
-        #if os(watchOS)
-        workoutManager.requestAuthorization()
-        #endif
+        // 4. Handle sticky requests that arrived during boot
+        if self.connectivity.hasPendingRequest {
+            print("📥 MatchViewModel: Found sticky peer request on startup. Responding...")
+            propagateChange()
+            self.connectivity.clearPendingRequest()
+        }
+        
+        // 5. Proactive Broadcast: If we already have a match running, tell the peer immediately
+        if isMatchStarted || state.version > 0 {
+            print("📤 MatchViewModel: Proactively broadcasting active match on startup (v\(state.version))")
+            propagateChange()
+        }
     }
     
     
@@ -220,6 +262,12 @@ public class MatchViewModel {
         await sync.unlinkMatch(courtId: courtId)
         #endif
     }
+    
+    public func requestPermissions() {
+        #if os(watchOS)
+        workoutManager.requestAuthorization()
+        #endif
+    }
 }
 
 // MARK: - Private Helpers
@@ -231,14 +279,16 @@ private extension MatchViewModel {
         sync.syncMatch(state: state, courtId: courtId)
         #endif
         connectivity.send(state: state, isStarted: isMatchStarted)
+        connectivity.clearPendingRequest()
     }
 
     func handleRemoteStateUpdate(_ newState: MatchState, isStarted: Bool) {
-        print("📥 Received remote state update. Version: \(newState.version) (Current: \(state.version))")
+        print("📥 MatchViewModel: Handling remote update. Version: \(newState.version) (Current: \(state.version)) isStarted: \(isStarted)")
         
-        // Only accept updates if they have a newer or equal version
-        guard newState.version >= state.version else {
-            print("⚠️ Ignoring stale remote update (v\(newState.version) < v\(state.version))")
+        // Only accept updates if they have a newer version
+        // (Allow equal version ONLY if we are syncing the 'isStarted' flag for the first time)
+        guard newState.version > state.version || (newState.version == state.version && isStarted != self.isMatchStarted) else {
+            print("♻️ Ignoring redundant/stale remote update (v\(newState.version) <= v\(state.version))")
             return
         }
         

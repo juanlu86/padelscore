@@ -9,8 +9,12 @@ public protocol ConnectivityProvider: AnyObject {
     var receivedStatePublisher: AnyPublisher<MatchState?, Never> { get }
     var receivedIsStartedPublisher: AnyPublisher<Bool?, Never> { get }
     var updatePublisher: PassthroughSubject<(MatchState, Bool), Never> { get }
+    var stateRequestPublisher: PassthroughSubject<Void, Never> { get }
+    var hasPendingRequest: Bool { get }
     
     func send(state: MatchState, isStarted: Bool)
+    func requestLatestState()
+    func clearPendingRequest()
 }
 
 public protocol SyncProvider: AnyObject {
