@@ -1,68 +1,91 @@
 'use client';
 
-import { useMatch } from '../hooks/useMatch';
-import { isMatchFinished, calculateSetsWon } from '../lib/matchUtils';
-import ScoreBoard from '../components/ScoreBoard';
+import { useState, useEffect } from 'react';
+import { signOut } from 'firebase/auth';
+import { auth, db } from '../lib/firebase';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { Court } from '../types/court';
+import CourtList from '../components/CourtList';
 
 export default function Home() {
-  const matchData = useMatch();
+  const [courts, setCourts] = useState<Court[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (!matchData) {
+  useEffect(() => {
+    // Check for logout request
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('logout') === 'true') {
+      signOut(auth).then(() => {
+        // Clean URL
+        window.history.replaceState({}, '', '/');
+      });
+    }
+
+    // Query only active courts
+    const q = query(collection(db, 'courts'), where('isActive', '==', true));
+
+    const unsub = onSnapshot(q, (snapshot) => {
+      const courtsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Court[];
+      setCourts(courtsData);
+      setLoading(false);
+    });
+    return () => unsub();
+  }, []);
+
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center p-6 bg-background text-foreground font-sans">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-padel-yellow border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-zinc-500 animate-pulse font-medium tracking-wide">WAITING FOR COURT DATA...</p>
+          <p className="text-zinc-500 animate-pulse font-medium tracking-wide">LOADING COURTS...</p>
         </div>
       </div>
     );
   }
 
-  const isOver = isMatchFinished(matchData);
-  const { team1: t1Sets, team2: t2Sets } = calculateSetsWon(matchData);
-  const team1Won = isOver && t1Sets > t2Sets;
-  const team2Won = isOver && t2Sets > t1Sets;
-
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-8 bg-background text-foreground font-sans selection:bg-padel-yellow/30 relative overflow-hidden">
+    <div className="flex min-h-screen flex-col p-4 md:p-8 bg-background text-foreground font-sans selection:bg-padel-yellow/30 relative overflow-hidden">
 
       {/* Dynamic Background Flare */}
-      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] opacity-20 transition-all duration-1000 pointer-events-none ${team1Won ? 'bg-green-500/30' : team2Won ? 'bg-blue-500/30' : 'bg-padel-yellow/20'}`}></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] opacity-20 bg-padel-yellow/20 pointer-events-none"></div>
 
-      {/* Container with Glassmorphism */}
-      <div className={`w-full max-w-3xl glass rounded-3xl overflow-hidden border border-white/5 shadow-2xl transition-all duration-700 ${isOver ? 'scale-[1.02] glow-white' : 'glow-yellow'}`}>
+      <div className="max-w-4xl mx-auto w-full z-10 space-y-8">
 
         {/* Header Section */}
-        <div className="bg-white/5 border-b border-white/5 p-6 flex justify-between items-center">
-          <div className="flex flex-col">
-            <h1 className="text-sm font-black tracking-widest text-zinc-400 uppercase">PadelScore Pro</h1>
-            <div className="flex items-center gap-2 mt-1">
-              <span className={`w-2 h-2 rounded-full ${!isOver ? 'bg-padel-yellow pulse' : 'bg-red-500'}`}></span>
-              <p className="text-xs font-bold tracking-tight text-zinc-500">
-                {!isOver ? 'LIVE FROM THE COURT' : 'FINAL MATCH RESULT'}
-              </p>
-            </div>
+        <div className="flex justify-between items-end border-b border-white/5 pb-6">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight text-white uppercase italic">Live Scores</h1>
+            <p className="text-zinc-500 text-sm mt-1 font-medium italic">SELECT A COURT TO WATCH LIVE</p>
           </div>
-          <div className="bg-padel-dark px-4 py-2 rounded-xl border border-white/5">
-            <span className="text-[10px] font-black text-padel-yellow uppercase tracking-widest">Court 1</span>
+          <div className="text-right flex flex-col items-end gap-2">
+            <span className="text-[10px] font-black text-padel-yellow tracking-[0.2em] uppercase">Status: Online</span>
+            <a
+              href="/login"
+              className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-widest border border-white/5 px-3 py-1 rounded-lg"
+            >
+              Admin Login
+            </a>
           </div>
         </div>
 
-        {/* Scoreboard Table Section */}
-        <ScoreBoard matchData={matchData} />
+        {/* Court List Component (Read Only) */}
+        <CourtList
+          courts={courts}
+          isAdmin={false}
+        />
 
         {/* Footer Info */}
-        <div className="bg-white/2 p-6 border-t border-white/5">
-          <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 tracking-widest uppercase">
-            <span>Powered by PadelScore</span>
-            <span>Ref: {matchData.updatedAt?.seconds || '—'}</span>
-          </div>
+        <div className="mt-12 text-center text-[10px] font-bold text-zinc-600 uppercase tracking-widest opacity-50">
+          <span>Powered by PadelScore</span>
         </div>
       </div>
 
       {/* Decorative Elements */}
-      <div className="mt-12 opacity-20 hidden md:block">
-        <p className="text-[12rem] font-black text-white/5 italic select-none pointer-events-none -mt-24">PADEL</p>
+      <div className="fixed bottom-0 left-0 w-full opacity-5 pointer-events-none -z-10">
+        <p className="text-[20vw] font-black text-white italic select-none text-center leading-[0.8]">PADEL</p>
       </div>
     </div>
   );

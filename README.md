@@ -8,7 +8,7 @@ PadelScore is designed for competitive players who want a high-visibility, distr
 
 - **iPhone App**: Manage matches, link to real-time courts via QR/Code, and sync with the Watch.
 - **Watch App**: High-impact scoring with oversized fonts and "tall" typography. Primary input device.
-- **Web App**: Admin dashboard for court management and live match spectator views.
+- **Web App**: Admin dashboard for court management and **Public Landing Page** for live match spectator views.
 - **PadelCore**: Shared Swift logic (Scoring rules: Standard, Golden Point, Star Point).
 - **Backend**: Firestore-driven real-time sync with "Pending Update" safety.
 
