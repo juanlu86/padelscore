@@ -32,7 +32,7 @@ service cloud.firestore {
 
     match /courts/{courtId} {
       allow read: if true;
-      allow create, delete: if isAuthenticated();
+      allow create: if isAuthenticated();
       
       // Allow Admin updates OR App updates (only liveMatch/updatedAt)
       allow update: if isAuthenticated() 

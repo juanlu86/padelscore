@@ -59,19 +59,29 @@ describe('Firestore Rules - Courts', () => {
         );
     });
 
-    it('denies deletion by unauthenticated users', async () => {
-        const unauthed = testEnv.unauthenticatedContext();
+    it('denies hard deletion even by admin users (Soft Delete Policy)', async () => {
+        const authed = testEnv.authenticatedContext('admin_user');
         await testEnv.withSecurityRulesDisabled(async (context) => {
             await context.firestore().collection('courts').doc('delete_me').set({ name: 'Delete Me' });
         });
 
         await assertFails(
-            unauthed.firestore().collection('courts').doc('delete_me').delete()
+            authed.firestore().collection('courts').doc('delete_me').delete()
+        );
+    });
+
+    it('allows authenticated (admin) users to soft delete (archive)', async () => {
+        const authed = testEnv.authenticatedContext('admin_user');
+        await testEnv.withSecurityRulesDisabled(async (context) => {
+            await context.firestore().collection('courts').doc('archive_me').set({ name: 'Archive Me', isActive: true });
+        });
+
+        await assertSucceeds(
+            authed.firestore().collection('courts').doc('archive_me').update({ isActive: false })
         );
     });
 
     it('allows unauthenticated "App" to update liveMatch', async () => {
-        // NOTE: The App is currently UNauthenticated. The rule allows update if fields are restricted.
         const unauthed = testEnv.unauthenticatedContext();
 
         await testEnv.withSecurityRulesDisabled(async (context) => {
