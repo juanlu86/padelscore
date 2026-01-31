@@ -108,7 +108,17 @@ public class MatchViewModel {
             .store(in: &cancellables)
             
         if !linkedCourtId.isEmpty {
-            setupCourtListener(id: linkedCourtId)
+            // Trigger the linking logic (sync + listener) explicitly since assigning in init avoids didSet
+            let normalized = linkedCourtId.uppercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            Task { @MainActor in
+                do {
+                    try await self.sync.syncMatchAsync(state: self.state, courtId: normalized)
+                    self.setupCourtListener(id: normalized)
+                } catch {
+                    print("⚠️ Initial sync failed: \(error.localizedDescription)")
+                    setupCourtListener(id: normalized)
+                }
+            }
         }
         #endif
         

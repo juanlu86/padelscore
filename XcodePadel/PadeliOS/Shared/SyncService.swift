@@ -73,7 +73,7 @@ public class SyncService: ObservableObject, SyncProvider {
                 print("✅ Match synced to \(path)")
                 
                 // Sync finished successfully. Check if there's a pending update.
-                self.processPendingUpdate()
+                self.processPendingUpdate(latestStatus: .synced)
                 
             } catch {
                 self.status = .failed(error.localizedDescription)
@@ -81,12 +81,12 @@ public class SyncService: ObservableObject, SyncProvider {
                 
                 // Even on error, we should probably try to sync the latest pending state
                 // to eventually reach consistency.
-                self.processPendingUpdate()
+                self.processPendingUpdate(latestStatus: .failed(error.localizedDescription))
             }
         }
     }
     
-    private func processPendingUpdate() {
+    private func processPendingUpdate(latestStatus: Status) {
         if let pending = pendingUpdate {
             print("🔄 Found pending update (v\(pending.0.version)). Triggering next sync.")
             let (state, courtId) = pending
@@ -95,7 +95,7 @@ public class SyncService: ObservableObject, SyncProvider {
             // But actually performSync sets status=.syncing immediately, so it's fine.
             performSync(state: state, courtId: courtId)
         } else {
-            status = .synced
+            status = latestStatus
         }
     }
     
@@ -112,10 +112,14 @@ public class SyncService: ObservableObject, SyncProvider {
             } else {
                 try await self.syncProvider.setData(data, collection: "matches", document: "test-match")
             }
-            status = .synced
+            // Sync finished successfully. Check if there's a pending update.
+            self.processPendingUpdate(latestStatus: .synced)
         } catch {
-            status = .failed(error.localizedDescription)
+            self.status = .failed(error.localizedDescription)
             print("❌ [Async] Sync error: \(error.localizedDescription)")
+            
+            // Check for pending updates even on failure to ensure eventual consistency
+            self.processPendingUpdate(latestStatus: .failed(error.localizedDescription))
             throw error
         }
     }
