@@ -124,6 +124,10 @@ public class MatchViewModel {
             }
         }
         .store(in: &cancellables)
+        
+        #if os(watchOS)
+        workoutManager.requestAuthorization()
+        #endif
     }
     
     
@@ -134,7 +138,6 @@ public class MatchViewModel {
         let courtId = linkedCourtId.isEmpty ? nil : linkedCourtId
         sync.syncMatch(state: state, courtId: courtId)
         #else
-        workoutManager.requestAuthorization()
         workoutManager.startWorkout()
         #endif
         connectivity.send(state: state, isStarted: isMatchStarted)
