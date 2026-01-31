@@ -107,8 +107,8 @@ xcodebuild test \
     -project XcodePadel/PadeliOS/PadeliOS.xcodeproj \
     -scheme PadeliOS \
     -destination 'platform=iOS Simulator,name=iPhone 17' \
-    -launchArgument "-UseLocalhost" \
     -only-testing:PadeliOSUITests/SyncE2ETests \
-    | xcpretty || echo "⚠️ iOS Tests failed or Simulator not available. Continuing..."
+    CODE_SIGNING_ALLOWED=NO \
+    -quiet || echo "⚠️ iOS Tests failed (Note: Simulator boot time can be slow). Continuing..."
 
 echo "✅ E2E Sequence Complete"

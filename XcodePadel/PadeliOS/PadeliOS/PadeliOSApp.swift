@@ -19,9 +19,22 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         FirebaseApp.configure()
         
-        #if DEBUG
-        // Firestore Emulator configuration removed for Production/App Check testing
-        #endif
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("-UseLocalhost") {
+            print("🚨 E2E MODE ENABLED: Connecting to Localhost Emulators 🚨")
+            
+            // Firestore
+            let settings = Firestore.firestore().settings
+            settings.host = "127.0.0.1:8080"
+            settings.cacheSettings = MemoryCacheSettings() // Disable persistence for tests
+            settings.isSSLEnabled = false
+            Firestore.firestore().settings = settings
+            
+            // Auth
+            // Auth.auth().useEmulator(withHost: "127.0.0.1", port: 9099) 
+            // Note: Auth emulator requires import FirebaseAuth, which might not be needed if we don't auth in iOS app yet.
+            // But good to have if we expand.
+        }
         
         // Initialize Watch Connectivity early
         _ = ConnectivityService.shared
