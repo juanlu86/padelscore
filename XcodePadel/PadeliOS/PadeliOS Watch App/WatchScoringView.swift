@@ -112,6 +112,10 @@ struct WatchScoringView: View {
                 onDismiss: { viewModel.resetMatch() }
             )
         }
+        .onAppear {
+            viewModel.activate()
+            viewModel.requestPermissions()
+        }
     }
     
     private var specialPointLabel: String? {

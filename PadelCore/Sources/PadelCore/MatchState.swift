@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SetResult: Codable, Equatable {
+public struct SetResult: Codable, Equatable, Sendable {
     public let team1Games: Int
     public let team2Games: Int
     
@@ -10,7 +10,7 @@ public struct SetResult: Codable, Equatable {
     }
 }
 
-public enum Score: String, Codable, CaseIterable {
+public enum Score: String, Codable, CaseIterable, Sendable {
     case zero = "0"
     case fifteen = "15"
     case thirty = "30"
@@ -19,13 +19,13 @@ public enum Score: String, Codable, CaseIterable {
     case game = "GAME"
 }
 
-public enum ScoringSystem: String, Codable, CaseIterable {
+public enum ScoringSystem: String, Codable, CaseIterable, Sendable {
     case standard = "Standard"
     case goldenPoint = "Golden Point"
     case starPoint = "Star Point"
 }
 
-public struct MatchState: Codable {
+public struct MatchState: Codable, Sendable {
     public var team1Score: Score = .zero
     public var team2Score: Score = .zero
     
