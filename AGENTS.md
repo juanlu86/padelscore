@@ -107,6 +107,10 @@ Every incremental change must follow this cycle:
     - **Performance**: Implemented 500ms debounce and background flush for `SyncService`.
     - **Stability**: Fixed "Stale State on Launch" using local persistence and temporal validation.
     - **Infrastructure**: Unified CI and Local testing with `Scripts/test_ios.sh` and automated Workflows.
+- **Phase 14: Web Public Launch 🌍**
+    - **Public Dashboard**: Transformed root (`/`) into a read-only live court list.
+    - **UX Polish**: Implemented "Deferred Logout" pattern to eliminate Redirect race conditions in Next.js protected routes.
+    - **Component Reusability**: Extracted `CourtList` for shared Admin/Public use.
 
 ### ⏳ Pending / Future
 - **Deployment**: Prepare for App Store (TestFlight) and Vercel Production.
