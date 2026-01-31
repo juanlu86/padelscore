@@ -59,7 +59,8 @@ bower_components
 *.tgz
 .yarn-integrity
 .env
-.dataconnect
-.grunt
-.lock-wscript
-build/Release
+# Test Results
+test-results/
+result.json
+.last-run.json
+# --- Misc ---
