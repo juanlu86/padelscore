@@ -248,11 +248,17 @@ final class MatchViewModelTests: XCTestCase {
         // Test that a pending request from ConnectivityService is handled upon activation
         
         // 1. Simulate a sticky request arriving *before* activation
+        // We need a fresh VM because setUp() already activated the default one
+        mockConnectivity = MockConnectivityProvider()
         mockConnectivity.hasPendingRequest = true
+        
+        let localVM = await MainActor.run {
+             return MatchViewModel(state: MatchState(), connectivity: mockConnectivity, sync: mockSync)
+        }
         
         // 2. Activate
         await MainActor.run {
-            viewModel.activate()
+            localVM.activate()
         }
         
         // 3. Verify response sent
