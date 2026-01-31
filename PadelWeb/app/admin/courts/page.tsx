@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { db } from '../../../lib/firebase';
-import { collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, setDoc, serverTimestamp, deleteField } from 'firebase/firestore';
+import { db, auth } from '../../../lib/firebase';
+import { collection, onSnapshot, doc, updateDoc, setDoc, serverTimestamp, deleteDoc, deleteField } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
 import { Court } from '../../../types/court';
+import { useAuth } from '../../../hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 export default function AdminCourts() {
     const [courts, setCourts] = useState<Court[]>([]);
@@ -11,6 +14,10 @@ export default function AdminCourts() {
     const [loading, setLoading] = useState(true);
     const [editingCourtId, setEditingCourtId] = useState<string | null>(null);
     const [editingName, setEditingName] = useState('');
+
+    // Auth
+    const { user } = useAuth();
+    const router = useRouter();
 
     useEffect(() => {
         const unsub = onSnapshot(collection(db, 'courts'), (snapshot) => {
@@ -23,6 +30,15 @@ export default function AdminCourts() {
         });
         return () => unsub();
     }, []);
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            router.push('/login');
+        } catch (error) {
+            console.error("Error signing out: ", error);
+        }
+    };
 
     const addCourt = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -40,6 +56,7 @@ export default function AdminCourts() {
             console.error("Error adding court: ", error);
         }
     };
+
     const resetCourt = async (id: string) => {
         if (!confirm('Are you sure you want to reset this court? This will unlink players and clear the match.')) return;
         try {
@@ -93,8 +110,17 @@ export default function AdminCourts() {
                         <h1 className="text-3xl font-black tracking-tight text-white uppercase italic">Court Management</h1>
                         <p className="text-zinc-500 text-sm mt-1 font-medium italic">ADMIN PANEL // PADELCORE PRO</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex flex-col items-end gap-2">
                         <span className="text-[10px] font-black text-padel-yellow tracking-[0.2em] uppercase">Status: Online</span>
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs text-zinc-400">{user?.email}</span>
+                            <button
+                                onClick={handleLogout}
+                                className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:text-red-400 transition-colors border border-white/10 px-3 py-1 rounded-lg"
+                            >
+                                Sign Out
+                            </button>
+                        </div>
                     </div>
                 </div>
 
