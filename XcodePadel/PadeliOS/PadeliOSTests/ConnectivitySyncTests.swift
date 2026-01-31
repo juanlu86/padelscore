@@ -15,6 +15,7 @@ final class ConnectivitySyncTests: XCTestCase {
         mockConnectivity = MockConnectivityProvider()
         mockSync = MockSyncProvider()
         viewModel = MatchViewModel(connectivity: mockConnectivity, sync: mockSync)
+        viewModel.activate()
     }
     
     func testStaleVersionIsIgnored() {

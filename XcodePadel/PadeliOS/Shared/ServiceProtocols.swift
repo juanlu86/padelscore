@@ -13,6 +13,7 @@ public protocol ConnectivityProvider: AnyObject {
     var hasPendingRequest: Bool { get }
     
     func send(state: MatchState, isStarted: Bool)
+    func persistState(state: MatchState, isStarted: Bool)
     func requestLatestState()
     func clearPendingRequest()
 }

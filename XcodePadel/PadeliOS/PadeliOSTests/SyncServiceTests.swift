@@ -64,7 +64,8 @@ final class SyncServiceTests: XCTestCase {
         // Since syncMatch uses Task { @MainActor in ... }, we should be able to check 
         // the status after a small delay or by using a continuation.
         // For simplicity in this test, we'll just wait a bit.
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
+        // Since syncMatch uses debouncing (0.5s), we must wait at least that long.
+        try? await Task.sleep(nanoseconds: 600_000_000) // 0.6s
         
         let status = service.status
         XCTAssertEqual(status, .synced)
@@ -79,7 +80,7 @@ final class SyncServiceTests: XCTestCase {
         
         service.syncMatch(state: state, courtId: nil)
         
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        try? await Task.sleep(nanoseconds: 600_000_000)
         
         // Wait and check
         if case .failed(_) = service.status {
@@ -104,7 +105,7 @@ final class SyncServiceTests: XCTestCase {
         
         service.syncMatch(state: state, courtId: courtId)
         
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        try? await Task.sleep(nanoseconds: 600_000_000)
         
         XCTAssertEqual(mock.lastCollection, "courts")
         XCTAssertEqual(mock.lastDocument, courtId)

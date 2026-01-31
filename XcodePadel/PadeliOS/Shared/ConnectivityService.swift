@@ -87,6 +87,35 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
         }
     }
     
+    /// Updates the application context without sending an interactive message.
+    /// Use this to ensure the "broadcast buffer" remains current even when receiving remote updates.
+    public func persistState(state: MatchState, isStarted: Bool) {
+        let session = WCSession.default
+        let isActivated = session.activationState == .activated
+        
+        guard isActivated else { return }
+        
+        do {
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(state)
+            
+            // IMPORTANT: Track the version we are sending so we don't process an echo of it later
+            // (Even though we are persisting a remote update, we are effectively adopting it as our own truth)
+            self.lastReceivedVersion = state.version
+            
+            let context: [String: Any] = [
+                "matchState": data,
+                "isStarted": isStarted,
+                "timestamp": Date().timeIntervalSince1970 
+            ]
+            
+            try session.updateApplicationContext(context)
+             self.log("💾 ConnectivityService: Persisted state v\(state.version) to ApplicationContext")
+        } catch {
+             self.log("❌ ConnectivityService: Failed to persist state: \(error.localizedDescription)", isError: true)
+        }
+    }
+    
     public func requestLatestState() {
         let session = WCSession.default
         let isActivated = session.activationState == .activated
@@ -164,6 +193,20 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
             hasPendingRequest = true
             stateRequestPublisher.send()
             return
+        }
+        
+        // STALENESS CHECK: Ignore contexts older than 3 hours
+        if let timestamp = context["timestamp"] as? TimeInterval {
+            let age = Date().timeIntervalSince1970 - timestamp
+            if age > (3 * 3600) { // 3 hours
+                self.log("🕰️ ConnectivityService: Ignoring stale context (Age: \(Int(age))s)")
+                return
+            }
+        } else {
+            // Optional: If no timestamp exists (legacy data), decide whether to accept or drop.
+            // For now, we'll log it but accept it to avoid breaking valid legacy sessions during upgrade,
+            // unless the user explicitly wants to force start-fresh.
+            self.log("⚠️ ConnectivityService: Context has no timestamp. Accepting potentially stale data.")
         }
         
         self.log("🔍 ConnectivityService: Processing received context/message...")
