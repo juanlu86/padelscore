@@ -3,7 +3,16 @@ name: E2E Integration
 on:
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'PadelWeb/**'
+      - 'XcodePadel/**'
+      - 'Scripts/**'
+      - '.github/workflows/e2e.yml'
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   e2e-suite:
@@ -16,7 +25,9 @@ jobs:
     - name: Setup Node
       uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: PadelWeb/package-lock.json
 
     - name: Setup Java (for Emulators)
       uses: actions/setup-java@v4
