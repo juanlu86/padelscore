@@ -33,10 +33,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct PadeliOSApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some Scene {
         WindowGroup {
             iPhoneMatchView()
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .background {
+                // Ensure any pending debounced sync is captured before suspension
+                SyncService.shared.flushPendingSync()
+            }
         }
     }
 }

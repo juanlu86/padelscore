@@ -28,13 +28,24 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
     private var pendingSync: (MatchState, Bool)?
     private var needsInitialSync: Bool = false
     
+    // MARK: - Logging Helper
+    private func log(_ message: String, isError: Bool = false) {
+        #if DEBUG
+        print(message)
+        #else
+        if isError {
+            print(message)
+        }
+        #endif
+    }
+    
     private override init() {
         super.init()
         if WCSession.isSupported() {
             let session = WCSession.default
             session.delegate = self
             session.activate()
-            print("⏳ WCSession activation requested...")
+            self.log("⏳ WCSession activation requested...")
         }
     }
     
@@ -43,7 +54,7 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
         let isActivated = session.activationState == .activated
         
         guard isActivated else {
-            print("⏳ ConnectivityService: Session not ready. Queuing pending update.")
+            self.log("⏳ ConnectivityService: Session not ready. Queuing pending update.")
             pendingSync = (state, isStarted)
             return
         }
@@ -66,13 +77,13 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
             
             if session.isReachable {
                 session.sendMessage(context, replyHandler: nil, errorHandler: { error in
-                    print("⚠️ ConnectivityService: sendMessage failed: \(error.localizedDescription)")
+                    self.log("⚠️ ConnectivityService: sendMessage failed: \(error.localizedDescription)", isError: true)
                 })
             }
             
             pendingSync = nil
         } catch {
-            print("❌ ConnectivityService: Failed to send match state: \(error.localizedDescription)")
+            self.log("❌ ConnectivityService: Failed to send match state: \(error.localizedDescription)", isError: true)
         }
     }
     
@@ -82,21 +93,21 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
         let isReachable = session.isReachable
         
         guard isActivated && isReachable else {
-            print("ℹ️ ConnectivityService: Cannot request latest state yet (Activated: \(isActivated), Reachable: \(isReachable)). Queuing request.")
+            self.log("ℹ️ ConnectivityService: Cannot request latest state yet (Activated: \(isActivated), Reachable: \(isReachable)). Queuing request.")
             needsInitialSync = true
             return 
         }
         
-        print("📡 ConnectivityService: Requesting latest state from peer...")
+        self.log("📡 ConnectivityService: Requesting latest state from peer...")
         session.sendMessage(["requestState": true], replyHandler: nil) { error in
-            print("⚠️ ConnectivityService: State request failed: \(error.localizedDescription)")
+            self.log("⚠️ ConnectivityService: State request failed: \(error.localizedDescription)", isError: true)
         }
         needsInitialSync = false
     }
     
     public func clearPendingRequest() {
         if hasPendingRequest {
-            print("🧹 ConnectivityService: Clearing sticky peer request")
+            self.log("🧹 ConnectivityService: Clearing sticky peer request")
             hasPendingRequest = false
         }
     }
@@ -105,16 +116,16 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
     
     public func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         if let error = error {
-            print("❌ ConnectivityService: WCSession activation failed: \(error.localizedDescription)")
+            self.log("❌ ConnectivityService: WCSession activation failed: \(error.localizedDescription)", isError: true)
         } else {
-            print("✅ ConnectivityService: WCSession activated with state: \(activationState.rawValue)")
+            self.log("✅ ConnectivityService: WCSession activated with state: \(activationState.rawValue)")
             
             // NEW: Check for existing application context data on activation
             if !session.receivedApplicationContext.isEmpty {
-                print("📦 ConnectivityService: Found existing application context on activation")
+                self.log("📦 ConnectivityService: Found existing application context on activation")
                 processReceivedContext(session.receivedApplicationContext)
             } else {
-                print("ℹ️ ConnectivityService: No previous application context found on activation")
+                self.log("ℹ️ ConnectivityService: No previous application context found on activation")
             }
             
             // Retry pending sync if we have one
@@ -124,7 +135,7 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
             
             // Retry queued initial sync request
             if needsInitialSync {
-                print("🔄 ConnectivityService: Retrying queued initial state request...")
+                self.log("🔄 ConnectivityService: Retrying queued initial state request...")
                 requestLatestState()
             }
         }
@@ -149,15 +160,15 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
     
     private func processReceivedContext(_ context: [String : Any]) {
         if context["requestState"] as? Bool == true {
-            print("📥 ConnectivityService: Received state request from peer")
+            self.log("📥 ConnectivityService: Received state request from peer")
             hasPendingRequest = true
             stateRequestPublisher.send()
             return
         }
         
-        print("🔍 ConnectivityService: Processing received context/message...")
+        self.log("🔍 ConnectivityService: Processing received context/message...")
         guard let data = context["matchState"] as? Data else { 
-            print("⚠️ ConnectivityService: No 'matchState' found in context. Keys: \(context.keys)")
+            self.log("⚠️ ConnectivityService: No 'matchState' found in context. Keys: \(context.keys)", isError: true)
             return 
         }
         
@@ -166,9 +177,9 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
             let state = try decoder.decode(MatchState.self, from: data)
             
             // LOGICAL VERSION FILTERING
-            print("📈 ConnectivityService: Received v\(state.version). Last known: \(lastReceivedVersion)")
+            self.log("📈 ConnectivityService: Received v\(state.version). Last known: \(lastReceivedVersion)")
             guard state.version > lastReceivedVersion else {
-                print("♻️ ConnectivityService: Ignoring stale/already processed update")
+                self.log("♻️ ConnectivityService: Ignoring stale/already processed update")
                 return
             }
             
@@ -179,16 +190,16 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
                 self.receivedState = state
                 self.receivedIsStarted = isStarted
                 self.updatePublisher.send((state, isStarted))
-                print("📩 ConnectivityService: UI state updated to v\(state.version) (isStarted: \(isStarted))")
+                self.log("📩 ConnectivityService: UI state updated to v\(state.version) (isStarted: \(isStarted))")
             }
         } catch {
-            print("❌ ConnectivityService: Failed to decode received match state: \(error.localizedDescription)")
+            self.log("❌ ConnectivityService: Failed to decode received match state: \(error.localizedDescription)", isError: true)
         }
     }
     
     public func sessionReachabilityDidChange(_ session: WCSession) {
         if session.isReachable {
-            print("📡 ConnectivityService: Peer became reachable. Checking for sync needs...")
+            self.log("📡 ConnectivityService: Peer became reachable. Checking for sync needs...")
             
             // 1. If we needed to pull state, do it now
             if needsInitialSync {
@@ -197,7 +208,7 @@ public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvi
             
             // 2. If we had a locally queued update to share, push it now
             if let pending = pendingSync {
-                print("📤 ConnectivityService: Pushing pending sync after reachability restoration")
+                self.log("📤 ConnectivityService: Pushing pending sync after reachability restoration")
                 send(state: pending.0, isStarted: pending.1)
             }
         }

@@ -11,7 +11,10 @@ final class MockFirestore: FirestoreSyncable {
     var lastCollection: String?
     var lastDocument: String?
     
+    var writeCount = 0
+    
     func setData(_ data: [String: Any], collection: String, document: String) async throws {
+        writeCount += 1
         if shouldFail {
             throw NSError(domain: "SyncError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Network unreachable"])
         }
@@ -106,6 +109,31 @@ final class SyncServiceTests: XCTestCase {
         XCTAssertEqual(mock.lastCollection, "courts")
         XCTAssertEqual(mock.lastDocument, courtId)
         XCTAssertNotNil(mock.lastData?["liveMatch"])
+    }
+    
+    func testRapidUpdatesAreDebounced() async {
+        let mock = MockFirestore()
+        // Provide the mock explicitly
+        let service = SyncService(provider: mock)
+        
+        // 1. Trigger rapid updates
+        for i in 1...5 {
+            var state = MatchState()
+            state.version = i
+            // We expect syncMatch to define the debounce logic internally
+            service.syncMatch(state: state, courtId: nil)
+            // No sleep, simulate instant successive calls
+        }
+        
+        // 2. Wait for debounce interval (assuming ~0.5s in implementation)
+        // We wait slightly longer to be safe
+        try? await Task.sleep(nanoseconds: 600_000_000) // 0.6s
+        
+        // 3. Verify ONLY the last write happened
+        // If NO throttling exists, this will be 5.
+        // If throttling works, this should be 1.
+        XCTAssertEqual(mock.writeCount, 1, "Should have collapsed 5 updates into 1 write")
+        XCTAssertEqual(mock.lastData?["version"] as? Int, 5, "Should have synced the latest version")
     }
 }
 #endif
