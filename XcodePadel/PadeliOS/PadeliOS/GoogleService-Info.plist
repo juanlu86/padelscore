@@ -3,28 +3,28 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyDummyKey-1234567890</string>
+	<string>AIzaSyDzS4J2xZ3ShOzTE7G1eFXJyWyhNeMxRrg</string>
 	<key>GCM_SENDER_ID</key>
-	<string>1234567890</string>
+	<string>297318170876</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.juanlu.padelscore</string>
+	<string>com.mekachis.PadeliOS</string>
 	<key>PROJECT_ID</key>
 	<string>padelscore-watch-1e0d3</string>
 	<key>STORAGE_BUCKET</key>
-	<string>padelscore-watch-1e0d3.appspot.com</string>
+	<string>padelscore-watch-1e0d3.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
-	<false/>
+	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<false/>
+	<false></false>
 	<key>IS_APPINVITE_ENABLED</key>
-	<false/>
+	<true></true>
 	<key>IS_GCM_ENABLED</key>
-	<true/>
+	<true></true>
 	<key>IS_SIGNIN_ENABLED</key>
-	<false/>
+	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1234567890:ios:abcdef123456</string>
+	<string>1:297318170876:ios:1ff035b8d2ca7ccbc79779</string>
 </dict>
 </plist>
