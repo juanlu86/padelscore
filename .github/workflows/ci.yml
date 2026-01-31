@@ -78,12 +78,16 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: 'latest'
+      - name: Cache Swift Packages
+        uses: actions/cache@v3
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData/PadeliOS-*/SourcePackages/
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved', '**/*.xcodeproj/project.pbxproj') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
       - name: List destinations (for debugging)
         run: xcodebuild -showdestinations -project XcodePadel/PadeliOS/PadeliOS.xcodeproj -scheme PadeliOS
-      - name: Run iOS Tests
+      - name: Run iOS Tests (Unit Only)
         run: |
-          xcodebuild test -project XcodePadel/PadeliOS/PadeliOS.xcodeproj \
-            -scheme PadeliOS \
-            -destination "platform=iOS Simulator,name=iPhone 17" \
-            -parallel-testing-enabled NO \
-            CODE_SIGNING_ALLOWED=NO
+          chmod +x Scripts/test_ios.sh
+          ./Scripts/test_ios.sh
