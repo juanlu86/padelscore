@@ -259,6 +259,7 @@ final class MatchViewModelTests: XCTestCase {
         XCTAssertFalse(mockConnectivity.hasPendingRequest, "Should clear the sticky request flag")
     }
     
+
     func testProactiveBroadcastOnStartup() async {
         // Test that if we start with an active match, we announce it
         

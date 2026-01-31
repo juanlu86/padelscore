@@ -72,6 +72,9 @@ public class MatchViewModel {
     private let sync: SyncProvider
     #endif
     
+    // NEW: Coordinator handles connectivity plumbing
+    private var coordinator: MatchSessionCoordinator!
+    
     public init(
         state: MatchState = MatchState(),
         connectivity: ConnectivityProvider? = nil,
@@ -81,84 +84,22 @@ public class MatchViewModel {
         if initialState.team1.isEmpty { initialState.team1 = "TEAM 1" }
         if initialState.team2.isEmpty { initialState.team2 = "TEAM 2" }
         self.state = initialState
-        self.connectivity = connectivity ?? ConnectivityService.shared
+        
+        let conn = connectivity ?? ConnectivityService.shared
+        self.connectivity = conn
         
         #if !os(watchOS)
-        self.sync = sync ?? SyncService.shared
+        let s = sync ?? SyncService.shared
+        self.sync = s
+        self.coordinator = MatchSessionCoordinator(viewModel: self, connectivity: conn, sync: s)
+        #else
+        self.coordinator = MatchSessionCoordinator(viewModel: self, connectivity: conn)
         #endif
-        
     }
     
     public func activate() {
-        guard !hasActivated else { return }
-        hasActivated = true
-        
-        #if !os(watchOS)
-        // Listen for sync status updates
-        self.sync.statusPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] status in
-                self?.syncStatus = status
-            }
-            .store(in: &cancellables)
-            
-        // Initial sync if court is already linked
-        Task { @MainActor [weak self] in
-            guard let self = self else { return }
-            let id = courtLink.linkedCourtId
-            if !id.isEmpty {
-                 try? await self.sync.syncMatchAsync(state: self.state, courtId: id)
-            }
-        }
-        #endif
-        
-        #if os(watchOS)
-        let platform = "watchOS"
-        #else
-        let platform = "iOS"
-        #endif
-        // print("🛠️ MatchViewModel: Activating... Target: \(platform)")
-        
-        // 1. Listen for state updates from the other device
-        self.connectivity.updatePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] state, isStarted in
-                // print("📡 MatchViewModel: Received update. v\(state.version)")
-                self?.handleRemoteStateUpdate(state, isStarted: isStarted)
-            }
-            .store(in: &cancellables)
-            
-        // 2. Listen for state requests from the other device (Peer asking us for the score)
-        self.connectivity.stateRequestPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in
-                print("📥 MatchViewModel: Peer requested state. Sending current state...")
-                self?.propagateChange()
-            }
-            .store(in: &cancellables)
-            
-        // 3. Initial Sync Strategy
-        if let initialRemoteState = self.connectivity.receivedState,
-           let initialIsStarted = self.connectivity.receivedIsStarted {
-            print("🚀 MatchViewModel: Found existing remote state in ConnectivityService: v\(initialRemoteState.version)")
-            handleRemoteStateUpdate(initialRemoteState, isStarted: initialIsStarted)
-        } else {
-            print("ℹ️ MatchViewModel: No initial remote state. Requesting from peer...")
-            self.connectivity.requestLatestState()
-        }
-        
-        // 4. Handle sticky requests that arrived during boot
-        if self.connectivity.hasPendingRequest {
-            print("📥 MatchViewModel: Found sticky peer request on startup. Responding...")
-            propagateChange()
-            self.connectivity.clearPendingRequest()
-        }
-        
-        // 5. Proactive Broadcast: If we already have a match running, tell the peer immediately
-        if isMatchStarted || state.version > 0 {
-            // print("📤 MatchViewModel: Proactively broadcasting active match on startup (v\(state.version))")
-            propagateChange()
-        }
+        // Delegate to Coordinator
+        coordinator.activate()
     }
     
     
@@ -271,15 +212,11 @@ public class MatchViewModel {
 }
 
 // MARK: - Private Helpers
-private extension MatchViewModel {
+extension MatchViewModel {
+    /// Centralized point to propagate local changes to both Watch and Cloud
     /// Centralized point to propagate local changes to both Watch and Cloud
     func propagateChange() {
-        #if !os(watchOS)
-        let courtId = linkedCourtId.isEmpty ? nil : linkedCourtId
-        sync.syncMatch(state: state, courtId: courtId)
-        #endif
-        connectivity.send(state: state, isStarted: isMatchStarted)
-        connectivity.clearPendingRequest()
+        coordinator.propagateChange()
     }
 
     func handleRemoteStateUpdate(_ newState: MatchState, isStarted: Bool) {
