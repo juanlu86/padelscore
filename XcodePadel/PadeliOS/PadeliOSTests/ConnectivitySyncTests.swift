@@ -3,6 +3,7 @@ import Combine
 import PadelCore
 @testable import PadeliOS
 
+@MainActor
 final class ConnectivitySyncTests: XCTestCase {
     
     var viewModel: MatchViewModel!
@@ -22,10 +23,9 @@ final class ConnectivitySyncTests: XCTestCase {
         
         // Simulate receiving an older version via mock
         let staleState = MatchState(team1Score: .forty, version: 9)
-        mockConnectivity.receivedState = staleState
-        mockConnectivity.receivedIsStarted = true
+        mockConnectivity.simulateUpdate(state: staleState, isStarted: true)
         
-        // No need for asyncAfter, as MatchViewModel reacts immediately to Published mock
+        // No need for asyncAfter, as MatchViewModel reacts immediately to updatePublisher mock
         XCTAssertEqual(viewModel.state.team1Score, .fifteen, "State should not have updated with stale version")
     }
     
@@ -34,10 +34,9 @@ final class ConnectivitySyncTests: XCTestCase {
         viewModel.state = initialState
         
         let newState = MatchState(team1Score: .forty, version: 11)
-        mockConnectivity.receivedState = newState
-        mockConnectivity.receivedIsStarted = true
+        mockConnectivity.simulateUpdate(state: newState, isStarted: true)
         
-        // Wait for Combine receive(on: .main)
+        // Wait for @MainActor Task
         try await Task.sleep(nanoseconds: 100_000_000)
         
         XCTAssertEqual(viewModel.state.team1Score, .forty, "State should have updated with newer version")
@@ -48,10 +47,9 @@ final class ConnectivitySyncTests: XCTestCase {
         viewModel.state = initialState
         
         let newState = MatchState(team1Score: .thirty, version: 11)
-        mockConnectivity.receivedState = newState
-        mockConnectivity.receivedIsStarted = true
+        mockConnectivity.simulateUpdate(state: newState, isStarted: true)
         
-        // Wait for Combine receive(on: .main)
+        // Wait for @MainActor Task
         try await Task.sleep(nanoseconds: 100_000_000)
         
         // Verify we can undo the remote point

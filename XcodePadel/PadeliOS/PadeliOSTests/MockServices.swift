@@ -5,16 +5,18 @@ import PadelCore
 @testable import PadeliOS
 
 public class MockConnectivityProvider: ConnectivityProvider {
-    @Published public var receivedState: MatchState?
-    @Published public var receivedIsStarted: Bool?
+    public var receivedState: MatchState?
+    public var receivedIsStarted: Bool?
     
     public var receivedStatePublisher: AnyPublisher<MatchState?, Never> {
-        $receivedState.eraseToAnyPublisher()
+        Just(receivedState).eraseToAnyPublisher()
     }
     
     public var receivedIsStartedPublisher: AnyPublisher<Bool?, Never> {
-        $receivedIsStarted.eraseToAnyPublisher()
+        Just(receivedIsStarted).eraseToAnyPublisher()
     }
+    
+    public let updatePublisher = PassthroughSubject<(MatchState, Bool), Never>()
     
     public var lastSentState: MatchState?
     public var lastSentIsStarted: Bool?
@@ -25,13 +27,19 @@ public class MockConnectivityProvider: ConnectivityProvider {
         lastSentIsStarted = isStarted
         sendCount += 1
     }
+    
+    public func simulateUpdate(state: MatchState, isStarted: Bool) {
+        receivedState = state
+        receivedIsStarted = isStarted
+        updatePublisher.send((state, isStarted))
+    }
 }
 
 public class MockSyncProvider: SyncProvider {
-    @Published public var status: SyncService.Status = .idle
+    public var status: SyncService.Status = .idle
     
     public var statusPublisher: AnyPublisher<SyncService.Status, Never> {
-        $status.eraseToAnyPublisher()
+        Just(status).eraseToAnyPublisher()
     }
     
     public var lastSyncedCourtId: String?
@@ -39,7 +47,6 @@ public class MockSyncProvider: SyncProvider {
     public var syncCount = 0
     
     public func syncMatch(state: MatchState, courtId: String? = nil) {
-        print("TestMock: syncMatch called for \(String(describing: courtId))")
         lastSyncedState = state
         lastSyncedCourtId = courtId
         syncCount += 1
@@ -54,7 +61,6 @@ public class MockSyncProvider: SyncProvider {
     public var unlinkExpectation: XCTestExpectation?
     
     public func unlinkMatch(courtId: String) async {
-        print("TestMock: unlinkMatch called for \(courtId)")
         lastSyncedCourtId = nil
         unlinkedCourtId = courtId
         syncCount += 1

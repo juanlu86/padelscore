@@ -3,6 +3,7 @@ import Combine
 import PadelCore
 @testable import PadeliOS
 
+@MainActor
 final class MatchViewModelTests: XCTestCase {
     var viewModel: MatchViewModel!
     var mockConnectivity: MockConnectivityProvider!
@@ -95,18 +96,27 @@ final class MatchViewModelTests: XCTestCase {
         XCTAssertEqual(mockConnectivity.sendCount, 1)
     }
 
-    func testUndoDoesNotRevertTeamNames() {
+    func testUndoDoesNotRevertTeamNames() async throws {
         // 1. Initial names
-        viewModel.updateTeamNames(team1: "A", team2: "B")
+        await MainActor.run {
+            viewModel.updateTeamNames(team1: "A", team2: "B")
+        }
         
         // 2. Score a point (history snapshots "A" and "B")
-        viewModel.scorePoint(forTeam1: true)
+        await viewModel.scorePoint(forTeam1: true)
         
         // 3. Edit names mid-match
-        viewModel.updateTeamNames(team1: "X", team2: "Y")
+        await MainActor.run {
+            viewModel.updateTeamNames(team1: "X", team2: "Y")
+        }
         
         // 4. Undo the point
-        viewModel.undoPoint()
+        await MainActor.run {
+            viewModel.undoPoint()
+        }
+        
+        // Small delay to ensure state propagates
+        try await Task.sleep(nanoseconds: 50_000_000)
         
         // 5. Verify names are still "X" and "Y", not reverted to "A" and "B"
         XCTAssertEqual(viewModel.state.team1, "X")
@@ -156,8 +166,7 @@ final class MatchViewModelTests: XCTestCase {
         newState.version = 100 // Higher version
         
         print("Test: Simulate receiving remote state")
-        mockConnectivity.receivedIsStarted = true
-        mockConnectivity.receivedState = newState
+        mockConnectivity.simulateUpdate(state: newState, isStarted: true)
         
         // 3. Wait for Combine pipeline (receive(on: .main))
         try await Task.sleep(nanoseconds: 200_000_000) // 0.2s

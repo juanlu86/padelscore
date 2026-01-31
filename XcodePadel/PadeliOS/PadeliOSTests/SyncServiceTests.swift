@@ -86,8 +86,8 @@ final class SyncServiceTests: XCTestCase {
         }
         
         let status = service.status
-        if case .failed(let message) = status {
-            XCTAssertEqual(message, "Network unreachable")
+        if case .failed(let error) = status {
+            XCTAssertEqual(error.localizedDescription, "Network: Network unreachable")
         } else {
             XCTFail("Status should be failed, but was \(status)")
         }

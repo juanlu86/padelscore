@@ -21,38 +21,60 @@ public class ProductionFirestore: FirestoreSyncable {
 }
 
 @MainActor
-public class SyncService: ObservableObject, SyncProvider {
-    public var statusPublisher: AnyPublisher<Status, Never> {
-        $status.eraseToAnyPublisher()
-    }
+@Observable
+public class SyncService: SyncProvider {
     public enum Status: Equatable {
         case idle
         case syncing
         case synced
-        case failed(String)
+        case failed(SyncError)
     }
     
-    @Published public var status: Status = .idle
+    public enum SyncError: Error, Equatable {
+        case networkError(String)
+        case dataError(String)
+        case unauthorized
+        case unknown(String)
+        
+        public var localizedDescription: String {
+            switch self {
+            case .networkError(let msg): return "Network: \(msg)"
+            case .dataError(let msg): return "Data: \(msg)"
+            case .unauthorized: return "Unauthorized"
+            case .unknown(let msg): return msg
+            }
+        }
+    }
+
+    public var status: Status {
+        get { _observedStatus }
+        set {
+            _observedStatus = newValue
+            statusSubject.send(newValue)
+        }
+    }
+
+    private var _observedStatus: Status = .idle
+    private let statusSubject = CurrentValueSubject<Status, Never>(.idle)
+    
+    public var statusPublisher: AnyPublisher<Status, Never> {
+        statusSubject.eraseToAnyPublisher()
+    }
+    
     public static let shared = SyncService()
     
     private let syncProvider: FirestoreSyncable
+    private var pendingUpdate: (MatchState, String?)?
     
-    /// Initializer with dependency injection
     public init(provider: FirestoreSyncable? = nil) {
         self.syncProvider = provider ?? ProductionFirestore()
     }
     
-    private var pendingUpdate: (MatchState, String?)?
-    
-    /// Syncs the match state to Firestore
     public func syncMatch(state: MatchState, courtId: String?) {
-        // If we are already syncing, queue this update as the "latest intent"
         if status == .syncing {
-            print("⏳ Sync in progress. Queuing update for v\(state.version)")
             pendingUpdate = (state, courtId)
             return
         }
-        
         performSync(state: state, courtId: courtId)
     }
     
@@ -61,84 +83,60 @@ public class SyncService: ObservableObject, SyncProvider {
         
         Task {
             let data = MatchFirestoreMapper.mapToFirestore(state: state)
-            let path = courtId != nil ? "courts/\(courtId!)" : "matches/test-match"
             
             do {
                 if let courtId = courtId {
-                    // Sync to a specific court's liveMatch field
                     try await self.syncProvider.setData(["liveMatch": data], collection: "courts", document: courtId)
                 } else {
-                    // Legacy sync for testing
                     try await self.syncProvider.setData(data, collection: "matches", document: "test-match")
                 }
-                print("✅ Match synced to \(path)")
-                
-                // Sync finished successfully. Check if there's a pending update.
+                print("✅ Match synced (v\(state.version))")
                 self.processPendingUpdate(latestStatus: .synced)
-                
             } catch {
-                self.status = .failed(error.localizedDescription)
-                print("❌ Sync error: \(error.localizedDescription)")
-                
-                // Even on error, we should probably try to sync the latest pending state
-                // to eventually reach consistency.
-                self.processPendingUpdate(latestStatus: .failed(error.localizedDescription))
+                let syncErr = SyncError.networkError(error.localizedDescription)
+                self.status = .failed(syncErr)
+                print("❌ Sync error: \(syncErr.localizedDescription)")
+                self.processPendingUpdate(latestStatus: .failed(syncErr))
             }
         }
     }
     
     private func processPendingUpdate(latestStatus: Status) {
         if let pending = pendingUpdate {
-            print("🔄 Found pending update (v\(pending.0.version)). Triggering next sync.")
             let (state, courtId) = pending
             pendingUpdate = nil
-            // Recursively call performSync (not syncMatch, to avoid re-queuing logic if we want to force start)
-            // But actually performSync sets status=.syncing immediately, so it's fine.
             performSync(state: state, courtId: courtId)
         } else {
             status = latestStatus
         }
     }
     
-    /// Syncs the match state to Firestore (Async variant)
     public func syncMatchAsync(state: MatchState, courtId: String?) async throws {
         let data = MatchFirestoreMapper.mapToFirestore(state: state)
-        // Manual status update for UI feedback
         status = .syncing
         
         do {
             if let courtId = courtId {
                 try await self.syncProvider.setData(["liveMatch": data], collection: "courts", document: courtId)
-                print("✅ [Async] Match synced to courts/\(courtId)")
             } else {
                 try await self.syncProvider.setData(data, collection: "matches", document: "test-match")
             }
-            // Sync finished successfully. Check if there's a pending update.
             self.processPendingUpdate(latestStatus: .synced)
         } catch {
-            self.status = .failed(error.localizedDescription)
-            print("❌ [Async] Sync error: \(error.localizedDescription)")
-            
-            // Check for pending updates even on failure to ensure eventual consistency
-            self.processPendingUpdate(latestStatus: .failed(error.localizedDescription))
+            let syncErr = SyncError.networkError(error.localizedDescription)
+            self.status = .failed(syncErr)
+            self.processPendingUpdate(latestStatus: .failed(syncErr))
             throw error
         }
     }
     
-    /// Unlinks the match from the court in Firestore (clears liveMatch)
-    /// Unlinks the match from the court in Firestore (clears liveMatch)
     public func unlinkMatch(courtId: String) async {
-        let collection = "courts"
-        let document = courtId
-        
         do {
-            // Use FieldValue.delete() to remove the field
-            try await self.syncProvider.setData(["liveMatch": FieldValue.delete()], collection: collection, document: document)
+            try await self.syncProvider.setData(["liveMatch": FieldValue.delete()], collection: "courts", document: courtId)
             print("✅ Unlinked match from court \(courtId)")
         } catch {
             print("❌ Failed to unlink match: \(error.localizedDescription)")
         }
     }
 }
-
 #endif

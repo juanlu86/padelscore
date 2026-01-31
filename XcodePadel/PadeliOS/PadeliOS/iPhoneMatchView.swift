@@ -86,8 +86,8 @@ struct iPhoneMatchView: View {
             )) {
                 Button("OK", role: .cancel) { }
             } message: {
-                if case .failed(let message) = viewModel.syncStatus {
-                    Text(message)
+                if case .failed(let error) = viewModel.syncStatus {
+                    Text(error.localizedDescription)
                 }
             }
             

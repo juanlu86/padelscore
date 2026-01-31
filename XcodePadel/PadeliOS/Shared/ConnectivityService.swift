@@ -3,18 +3,23 @@ import WatchConnectivity
 import Combine
 import PadelCore
 
-public class ConnectivityService: NSObject, ObservableObject, WCSessionDelegate, ConnectivityProvider {
+@Observable
+public class ConnectivityService: NSObject, WCSessionDelegate, ConnectivityProvider {
     public static let shared = ConnectivityService()
     
-    @Published public var receivedState: MatchState?
-    @Published public var receivedIsStarted: Bool?
+    public var receivedState: MatchState?
+    public var receivedIsStarted: Bool?
+    
+    public let updatePublisher = PassthroughSubject<(MatchState, Bool), Never>()
     
     public var receivedStatePublisher: AnyPublisher<MatchState?, Never> {
-        $receivedState.eraseToAnyPublisher()
+        // Keep for backward compatibility during migration if needed, 
+        // but prefer Observation in new code.
+        Just(receivedState).eraseToAnyPublisher()
     }
     
     public var receivedIsStartedPublisher: AnyPublisher<Bool?, Never> {
-        $receivedIsStarted.eraseToAnyPublisher()
+        Just(receivedIsStarted).eraseToAnyPublisher()
     }
     
     private var lastReceivedVersion: Int = -1
@@ -33,7 +38,6 @@ public class ConnectivityService: NSObject, ObservableObject, WCSessionDelegate,
     public func send(state: MatchState, isStarted: Bool) {
         let session = WCSession.default
         let isActivated = session.activationState == .activated
-        print("📡 Attempting to send. Session state: \(session.activationState.rawValue) (Activated: \(isActivated))")
         
         guard isActivated else {
             print("⏳ Session not ready. Queuing pending update.")
@@ -60,10 +64,8 @@ public class ConnectivityService: NSObject, ObservableObject, WCSessionDelegate,
                 session.sendMessage(context, replyHandler: nil) { error in
                     print("⚠️ sendMessage failed: \(error.localizedDescription)")
                 }
-                print("⚡️ sendMessage sent (high priority)")
             }
             
-            print("📲 Context update sent. Started: \(isStarted)")
             pendingSync = nil
         } catch {
             print("❌ Failed to send match state: \(error.localizedDescription)")
@@ -77,14 +79,9 @@ public class ConnectivityService: NSObject, ObservableObject, WCSessionDelegate,
             print("❌ WCSession activation failed: \(error.localizedDescription)")
         } else {
             print("✅ WCSession activated with state: \(activationState.rawValue)")
-            print("📱 WCSession Reachable: \(session.isReachable)")
-            #if os(iOS)
-            print("⌚️ Is Paired: \(session.isPaired), Watch App Installed: \(session.isWatchAppInstalled)")
-            #endif
             
             // Retry pending sync if we have one
             if let pending = pendingSync {
-                print("🔄 Retrying pending sync after activation...")
                 send(state: pending.0, isStarted: pending.1)
             }
         }
@@ -106,20 +103,18 @@ public class ConnectivityService: NSObject, ObservableObject, WCSessionDelegate,
             let state = try decoder.decode(MatchState.self, from: data)
             
             // LOGICAL VERSION FILTERING
-            // Only process if the incoming state has a GREATER version than what we last processed
             guard state.version > lastReceivedVersion else {
-                print("📩 Ignoring stale state version (Incoming: \(state.version) <= Current: \(lastReceivedVersion))")
                 return
             }
             
             self.lastReceivedVersion = state.version
-            
             let isStarted = context["isStarted"] as? Bool ?? true
             
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.receivedState = state
                 self.receivedIsStarted = isStarted
-                print("📩 Received state update (Started: \(isStarted)) via \(WCSession.isSupported() ? "WCSession" : "Unknown")")
+                self.updatePublisher.send((state, isStarted))
+                print("📩 Received state update v\(state.version)")
             }
         } catch {
             print("❌ Failed to decode received match state: \(error.localizedDescription)")
@@ -127,24 +122,9 @@ public class ConnectivityService: NSObject, ObservableObject, WCSessionDelegate,
     }
     
     #if os(iOS)
-    public func sessionDidBecomeInactive(_ session: WCSession) {
-        print("📱 WCSession became inactive")
-    }
-    
+    public func sessionDidBecomeInactive(_ session: WCSession) { }
     public func sessionDidDeactivate(_ session: WCSession) {
-        print("📱 WCSession deactivated. Re-activating...")
         WCSession.default.activate()
     }
-    
-    public func sessionWatchStateDidChange(_ session: WCSession) {
-        print("⌚️ Watch State Changed:")
-        print("   - Is Paired: \(session.isPaired)")
-        print("   - Watch App Installed: \(session.isWatchAppInstalled)")
-        print("   - Complication Enabled: \(session.isComplicationEnabled)")
-    }
     #endif
-    
-    public func sessionReachabilityDidChange(_ session: WCSession) {
-        print("📡 Reachability Changed: \(session.isReachable)")
-    }
 }
